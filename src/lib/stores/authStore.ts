@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store';
 import { pb } from '../pocketbase/pocketbase.js';
 import type AuthState from "$lib/models/IAuthState";
+import {fetchUserInfo} from "$lib/stores/userInfoStore";
+
 
 
 export const authStore = writable<AuthState>({

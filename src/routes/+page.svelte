@@ -4,6 +4,7 @@
 	import {goto} from "$app/navigation";
 	import Navigation from "$lib/components/Navigation.svelte";
 
+
 	function handleLogout() {
 		logout();
 		goto('/login');
@@ -16,7 +17,6 @@
 {#if $authStore.isAuthenticated}
 	<p>Welcome, {$authStore.user?.email}!</p>
 {/if}
-
 
 {#if $authStore.isAuthenticated}
 	<Button on:click={handleLogout} class={buttonVariants({ variant: "outline" })}>Logout</Button>

@@ -12,8 +12,11 @@
         try {
             login(email, password);
 
+            console.log($authStore.user);
+
             if($authStore.user)
                 goto('/');
+
         } catch (error) {
             console.error('Login error:', error);
         }
