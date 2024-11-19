@@ -1,8 +1,7 @@
-.mh-85vh {
-  min-height: 85vh;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.navigation {
-  max-width: 1200px;
-
+html, body {
+  height: 100%;
 }
