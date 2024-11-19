@@ -1,5 +1,8 @@
 {
 	"/": [],
+	"/create-event": [],
 	"/events": [],
-	"/login": []
+	"/login": [],
+	"/map": [],
+	"/my-profile": []
 }

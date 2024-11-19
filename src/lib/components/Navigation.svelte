@@ -10,7 +10,7 @@
             </a>
         </div>
         <div class="col-3">
-            <a>
+            <a href="/events">
                 <SquareChartGantt/>
             </a>
         </div>
