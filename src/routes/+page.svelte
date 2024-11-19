@@ -8,6 +8,7 @@
 	const defaultLat = 14.28611;
 	const defaultLng = 48.30639;
 
+
 	function handleLogout() {
 		logout();
 		goto('/login');
