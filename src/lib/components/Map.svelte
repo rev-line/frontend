@@ -1,53 +1,42 @@
 <script lang="ts">
     import { MapLibre } from 'svelte-maplibre';
-    let {defaultLat, defaultLng, tileSheet} = $props();
     import { onMount, onDestroy } from 'svelte';
     import maplibregl from 'maplibre-gl';
-
+    import { io } from 'socket.io-client';
+    let { defaultLat, defaultLng, tileSheet } = $props();
     let map: any;
     let userMarker: any;
-    let userLocation = $state({
-        lat: 0,
-        lng: 0
-    }); // Default coordinates
-    let watchId: number | undefined;
+    let otherUserMarkers = new Map<string, maplibregl.Marker>();
+    let socket: any;
 
     onMount(() => {
+        map = new maplibregl.Map({
+            container: 'map',
+            style: tileSheet,
+            center: [defaultLng, defaultLat],
+            zoom: 15,
+        });
 
-    });
+        // placeholder
+        socket = io('http://localhost:3000');
 
-    onDestroy(() => {
-        if (watchId !== undefined) {
-            navigator.geolocation.clearWatch(watchId);
-        }
-
-        // Clean up the marker
-        if (userMarker) {
-            userMarker.remove();
-        }
-    });
-
-   const initRevlineMap = (() => {
         if (navigator.geolocation) {
-            watchId = navigator.geolocation.watchPosition(
+            navigator.geolocation.watchPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
-                    userLocation = { lat: latitude, lng: longitude };
-                    console.log('User location:', userLocation);
-                        if (!userMarker) {
-                            // Create the marker for the first time
-                            userMarker = new maplibregl.Marker()
-                                .setLngLat([longitude, latitude])
-                                .addTo(map);
-                            console.log('Marker added:', [longitude, latitude]);
-                        } else {
-                            // Update the marker position
-                            userMarker.setLngLat([longitude, latitude]);
-                            console.log('Marker updated:', [longitude, latitude]);
-                        }
+                    const userLocation = { lat: latitude, lng: longitude };
 
-                        // Optional: Update the map center to follow the user
-                        map.setCenter([longitude, latitude]);
+                    socket.emit('locationUpdate', userLocation);
+
+                    if (!userMarker) {
+                        userMarker = new maplibregl.Marker({ color: 'blue' })
+                            .setLngLat([longitude, latitude])
+                            .addTo(map);
+                    } else {
+                        userMarker.setLngLat([longitude, latitude]);
+                    }
+
+                    map.setCenter([longitude, latitude]);
                 },
                 (error) => {
                     console.error('Error watching position:', error);
@@ -57,20 +46,51 @@
         } else {
             console.error('Geolocation is not supported by this browser.');
         }
-    })
 
+        socket.on('userLocations', (locations: any) => {
+            console.log('Updated user locations:', locations);
+            updateMarkers(locations);
+        });
+    });
+
+    onDestroy(() => {
+        if (socket) {
+            socket.disconnect();
+        }
+
+        if (userMarker) {
+            userMarker.remove();
+        }
+
+        otherUserMarkers.forEach((marker) => marker.remove());
+    });
+
+    function updateMarkers(locations: any) {
+        const existingIds = new Set();
+
+        locations.forEach((location: any) => {
+            const id = `${location.lat}-${location.lng}`;
+
+            existingIds.add(id);
+
+            if (!otherUserMarkers.has(id)) {
+                const marker = new maplibregl.Marker({ color: 'red' })
+                    .setLngLat([location.lng, location.lat])
+                    .addTo(map);
+
+                otherUserMarkers.set(id, marker);
+            } else {
+                otherUserMarkers.get(id)?.setLngLat([location.lng, location.lat]);
+            }
+        });
+
+        otherUserMarkers.forEach((marker, id) => {
+            if (!existingIds.has(id)) {
+                marker.remove();
+                otherUserMarkers.delete(id);
+            }
+        });
+    }
 </script>
 
-<MapLibre
-        center={[userLocation.lng ?? defaultLat, userLocation.lat ?? defaultLng]}
-        zoom={12}
-        class="map"
-        standardControls
-        onload={initRevlineMap}
-        style={tileSheet} />
-
-<style>
-    :global(.map) {
-        height: 90vh;
-    }
-</style>
+<div id="map" style="width: 100%; height: 90vh;"></div>
