@@ -9,7 +9,8 @@
     let otherUserMarkers = new Map<string, maplibregl.Marker>();
     let socket: any;
 
-    onMount(() => {
+
+    const initRevlineMap = () => {
         map = new maplibregl.Map({
             container: 'map',
             style: tileSheet,
@@ -18,7 +19,7 @@
         });
 
         // placeholder
-        socket = io('http://localhost:3000');
+        socket = io('https://revline-express.programar.io/');
 
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(
@@ -51,9 +52,19 @@
             console.log('Updated user locations:', locations);
             updateMarkers(locations);
         });
+    }
+
+
+
+    onMount(() => {
+        initRevlineMap();
     });
 
     onDestroy(() => {
+        if(map) {
+            map.destroy();
+        }
+
         if (socket) {
             socket.disconnect();
         }
@@ -93,4 +104,4 @@
     }
 </script>
 
-<div id="map" style="width: 100%; height: 90vh;"></div>
+<div id="map" style="width: 100%; height: 100vh;"></div>

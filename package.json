@@ -38,6 +38,8 @@
 	"dependencies": {
 		"pocketbase": "^0.21.5",
 		"socket.io-client": "^4.8.1",
-		"svelte-maplibre": "^1.0.0-next.3"
+		"svelte-maplibre": "^1.0.0-next.3",
+		"lucide-svelte": "^0.455.0",
+		"maplibre-gl": "^2.6.1"
 	}
 }

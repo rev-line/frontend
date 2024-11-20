@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { authStore, logout } from '$lib/stores/authStore';
-	import {Button, buttonVariants} from "$lib/components/ui/button";
 	import {goto} from "$app/navigation";
-	import Navigation from "$lib/components/Navigation.svelte";
 	import Map from "$lib/components/Map.svelte";
 
 	const defaultLat = 14.28611;
