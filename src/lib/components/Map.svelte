@@ -11,9 +11,16 @@
     let userMarker: any;
     let otherUserMarkers = new Map<string, maplibregl.Marker>();
     let socket: any;
-    let showMap =  $state(true);
+    let errorMessage =  $state('');
+    let showMap = $state(true);
 
-
+    if(!$authStore.isAuthenticated) {
+        // this way, we can verify the status is actually correct before showing the error message
+        setTimeout(() => {
+            errorMessage = 'Please log in to use this feature.';
+            showMap = false;
+        }, 750);
+    }
 
     const initRevlineMap = () => {
         map = new maplibregl.Map({
@@ -53,11 +60,13 @@
                 (error) => {
                     toast.push('Please allow location access to use this feature.');
                     console.error('Error watching position:', error);
+                    errorMessage = 'Please allow location access to use this feature.';
                     showMap = false;
                 },
                 { enableHighAccuracy: true }
             );
         } else {
+            toast.push('Geolocation is not available in your browser');
             console.error('Geolocation is not available');
         }
 
@@ -70,6 +79,11 @@
 
 
     onMount(() => {
+        if(!$authStore.isAuthenticated) {
+            errorMessage = 'Please log in to use this feature.';
+            showMap = false;
+            return;
+        }
         initRevlineMap();
     });
 
@@ -121,6 +135,6 @@
 {#if showMap}
     <div id="map" style="width: 100%; height: 100vh;"> </div>
     {:else}
-    <BlockScreen fullscreen={true} text={"Please allow location access to use this feature."} />
+    <BlockScreen fullscreen={true} text={errorMessage} />
 {/if}
 
