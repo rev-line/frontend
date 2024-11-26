@@ -43,4 +43,22 @@ export const logout = (): void => {
 	});
 };
 
+export const createUser = async (email: string, password: string): Promise<void> => {
+	try {
+		const userData = {
+			email,
+			password,
+			passwordConfirm: password
+		};
+
+		const newUser = await pb.collection('users').create(userData);
+		console.log('User created:', newUser);
+
+		await login(email, password);
+	} catch (error) {
+		console.error('Error creating user:', error);
+		throw error;
+	}
+};
+
 initAuth();

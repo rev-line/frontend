@@ -1,5 +1,6 @@
 <script>
-    import {BadgePlus, Map, SquareChartGantt, UserPen} from "lucide-svelte";
+    import {BadgePlus, LogIn, Map, SquareChartGantt, UserPen} from "lucide-svelte";
+    import {authStore} from "$lib/stores/authStore.ts";
 </script>
 
 <div class="navigation justify-content-center">
@@ -19,10 +20,19 @@
                 <BadgePlus/>
             </a>
         </div>
-        <div class="col-3 nav-item">
-            <a href="/my-profile" data-sveltekit-reload>
-                <UserPen/>
-            </a>
-        </div>
+        {#if $authStore.isAuthenticated}
+            <div class="col-3 nav-item">
+                <a href="/my-profile" data-sveltekit-reload>
+                    <UserPen/>
+                </a>
+            </div>
+        {:else}
+            <div class="col-3 nav-item">
+                <a href="/login" data-sveltekit-reload>
+                    <LogIn/>
+                </a>
+            </div>
+        {/if}
+
     </div>
 </div>

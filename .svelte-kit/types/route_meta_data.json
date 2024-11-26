@@ -3,6 +3,7 @@
 	"/create-event": [],
 	"/events": [],
 	"/login": [],
+	"/login/newUser": [],
 	"/map": [],
 	"/my-profile": []
 }
