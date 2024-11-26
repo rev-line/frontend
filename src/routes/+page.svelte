@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { authStore, logout } from '$lib/stores/authStore';
-	import {goto} from "$app/navigation";
+	import { authStore } from '$lib/stores/authStore';
 	import Map from "$lib/components/Map.svelte";
 
 	const defaultLat = 14.28611;
 	const defaultLng = 48.30639;
 
 
-	function handleLogout() {
-		logout();
-		goto('/login');
-	}
+
 </script>
 
 <Map

@@ -11,4 +11,5 @@ export default interface IEvent{
     max_people?: number;
     start_longitude?: string;
     start_latitude?: string;
+    waypoints?: string[];
 }

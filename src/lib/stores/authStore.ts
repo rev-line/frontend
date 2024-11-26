@@ -1,9 +1,6 @@
 import { writable } from 'svelte/store';
 import { pb } from '../pocketbase/pocketbase.js';
 import type AuthState from "$lib/models/IAuthState";
-import {fetchUserInfo} from "$lib/stores/userInfoStore";
-
-
 
 export const authStore = writable<AuthState>({
 	isAuthenticated: false,
@@ -32,6 +29,7 @@ export const login = async (email: string, password: string): Promise<void> => {
 			isAuthenticated: pb.authStore.isValid,
 			user: pb.authStore.model,
 		});
+		console.log(pb.authStore.model);
 	} catch (error) {
 		throw error;
 	}
