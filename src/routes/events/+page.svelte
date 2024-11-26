@@ -13,12 +13,12 @@
     }
 </script>
 
-<div class="container">
+<div class="container flex flex-col justify-center items-center">
     <h1 class="text-3xl"> Events </h1>
 
     {#if $eventMinimalStore.length > 0}
             {#each $eventMinimalStore as event}
-                <a on:click={handleRedirectDetailView}>
+                <button class="w-3/4" on:click={handleRedirectDetailView}>
                     <Card.Root class="mt-2" >
                         <Card.Header>
                             <Card.Title>{event.name}</Card.Title>
@@ -36,8 +36,7 @@
                             <p>Max people: {event.max_people}</p>
                         </Card.Content>
                     </Card.Root>
-                </a>
-
+                </button>
             {/each}
     {/if}
 </div>
