@@ -1,5 +1,4 @@
 <script lang="ts">
-    import * as Card from "$lib/components/ui/card";
     import {Input} from "$lib/components/ui/input";
     import {Button, buttonVariants} from "$lib/components/ui/button";
     import { authStore, createUser} from "$lib/stores/authStore";
