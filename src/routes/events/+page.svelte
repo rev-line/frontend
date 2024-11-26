@@ -2,33 +2,42 @@
     import { eventMinimalStore, fetchMinimalEvents } from "$lib/stores/eventMinimalStore";
     import {onMount} from "svelte";
     import * as Card from "$lib/components/ui/card";
-    import {fetchEventDetails, eventDetailStore} from "$lib/stores/eventDetailStore";
+    import {goto} from "$app/navigation";
 
     onMount(() => {
         fetchMinimalEvents();
-        fetchEventDetails("30hxjmj4bfmsjrs");
-
-        console.log($eventDetailStore)
     })
+
+    function handleRedirectDetailView(){
+        goto('/');
+    }
 </script>
 
 <div class="container">
-    <h1> events </h1>
+    <h1 class="text-3xl"> Events </h1>
 
     {#if $eventMinimalStore.length > 0}
             {#each $eventMinimalStore as event}
-                <Card.Root class="mt-2">
-                    <Card.Header>
-                        <Card.Title>{event.name}</Card.Title>
-                        <Card.Description>Card Description</Card.Description>
-                    </Card.Header>
-                    <Card.Content>
-                        <p>ID: {event.id}</p>
-                    </Card.Content>
-                    <Card.Footer>
-                        <p>Card Footer</p>
-                    </Card.Footer>
-                </Card.Root>
+                <a on:click={handleRedirectDetailView}>
+                    <Card.Root class="mt-2" >
+                        <Card.Header>
+                            <Card.Title>{event.name}</Card.Title>
+                            <Card.Description>
+                                {#if event.rideout}
+                                    <h2 class="text">Rideout</h2>
+                                {:else}
+                                    <h2>Hangout</h2>
+                                {/if}
+                            </Card.Description>
+                        </Card.Header>
+                        <Card.Content>
+
+                            <p>ID: {event.id}</p>
+                            <p>Max people: {event.max_people}</p>
+                        </Card.Content>
+                    </Card.Root>
+                </a>
+
             {/each}
     {/if}
 </div>
