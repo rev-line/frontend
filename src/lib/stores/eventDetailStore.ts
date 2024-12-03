@@ -16,6 +16,15 @@ export async function fetchEventDetails(eventId: string): Promise<void> {
     }
 }
 
+export async function createEvent(eventData: Partial<IEvent>): Promise<void> {
+    try {
+        await pb.collection('event').create(eventData);
+    } catch (error) {
+        console.error('Error creating event:', error);
+        throw error; // Re-throw error for handling in the UI
+    }
+}
+
 // Clear the store when needed
 export function clearEventDetails(): void {
     eventDetailStore.set(null);
