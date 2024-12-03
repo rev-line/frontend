@@ -37,14 +37,22 @@ html, body {
   visibility: hidden;
 }
 
-.event-marker {
+.maplibregl-marker.event-marker {
   background: url("hotspot.svg") no-repeat center bottom;
 }
 
-.user-marker {
+.maplibregl-marker.user-marker {
   background: url("car.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker {
   background: url("car-current.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.user-marker-motorcycle {
+  background: url("motorcycle.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.self-user-marker-motorcycle {
+  background: url("motorcycle-current.svg") no-repeat center bottom;
 }
