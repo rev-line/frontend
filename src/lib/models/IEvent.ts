@@ -9,7 +9,7 @@ export default interface IEvent{
     start_date?: string; // ISO 8601 Date format
     duration?: string; // ISO 8601 Date format
     max_people?: number;
-    start_longitude?: string;
-    start_latitude?: string;
+    start_longitude?: number;
+    start_latitude?: number;
     waypoints?: string[];
 }
