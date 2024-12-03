@@ -1,7 +1,8 @@
 <script lang="ts">
     import {Input} from "$lib/components/ui/input";
     import {Button, buttonVariants} from "$lib/components/ui/button";
-    import { authStore, createUser} from "$lib/stores/authStore";
+    import { authStore, createUser, linkUserInformation} from "$lib/stores/authStore";
+    import {userInfoStore, createUserInfo} from "$lib/stores/userInfoStore";
     import {goto} from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
 
@@ -13,6 +14,9 @@
             await createUser(email, password);
 
             if($authStore.user)
+                await createUserInfo();
+                console.log("THIS IS MY AWESOME ID: ", $userInfoStore?.id);
+                await linkUserInformation($authStore?.user.id, $userInfoStore?.id);
                 goto('/');
         } catch (error) {
             console.error('Login error:', error);

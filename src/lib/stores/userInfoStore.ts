@@ -141,6 +141,17 @@ export async function updateUserInfo(userInformation_id: string, updates: Partia
     }
 }
 
+export async function createUserInfo() {
+    try {
+        const userInfo = await pb.collection('user_info').create({});
+        userInfoStore.set(userInfo);
+        console.log(userInfo);
+    } catch (error) {
+        console.error('Error creating user_info:', error);
+    }
+}
+
+// Subscribe to authStore for automatic user info fetching
 authStore.subscribe((authState) => {
     if (authState.isAuthenticated && authState.user) {
         fetchUserInfo(authState.user.user_informations).then();
