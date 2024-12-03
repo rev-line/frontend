@@ -3,6 +3,7 @@
     import {Button, buttonVariants} from "$lib/components/ui/button";
     import { authStore, createUser} from "$lib/stores/authStore";
     import {goto} from "$app/navigation";
+    import * as Card from "$lib/components/ui/card";
 
     let email: string = '';
     let password: string = '';
