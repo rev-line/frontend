@@ -61,4 +61,19 @@ export const createUser = async (email: string, password: string): Promise<void>
 	}
 };
 
+export const linkUserInformation = async (userId: string, userInformationId: string) => {
+	if(pb.authStore.model?.id === null || pb.authStore.model?.id !== userId){
+		console.log("You are not loggedin");
+		return;
+	}
+
+	try {
+		await pb.collection('users').update(userId, {
+			"user_informations": userInformationId
+		});
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 initAuth();
