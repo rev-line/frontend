@@ -11,4 +11,5 @@ export default interface UserInfo {
     vehicles?: string[]; // Array of vehicle references
     upcoming_events?: string[]; // Array of event references
     past_events?: string[]; // Array of event references
+    collectionId: string;
 }

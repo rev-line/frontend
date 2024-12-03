@@ -15,7 +15,6 @@ export async function fetchUserInfo(userId: string) {
     try {
         const userInfo = await pb.collection('user_info').getOne(userId);
         userInfoStore.set(userInfo);
-
         // Fetch vehicles if available
         if (userInfo.vehicles?.length > 0) {
             fetchUserVehicles(userInfo.vehicles);
