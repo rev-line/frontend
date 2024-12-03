@@ -18,6 +18,9 @@
     let showMap = $state(true);
     let calculatedSpeed =  $state(0);
 
+    // we're running into an issue, where the map requires user input before it can be interacted with/ loaded
+    // also, sometimes we receive the error "failed to fetch" from the cdn - might be related to the same issue
+    let debugLine = "[" + Date.now() + "] Map.svelte: defaultLat: " + defaultLat + ", defaultLng: " + defaultLng + ", tileSheet: " + tileSheet;
 
     const initRevlineMap = () => {
         map = new maplibregl.Map({
@@ -27,7 +30,6 @@
             zoom: 15,
         });
 
-        // placeholder
         socket = io('https://revline-express.programar.io/');
 
         if (!socket) {
@@ -35,18 +37,11 @@
             showMap = false;
         }
 
-        fetchMinimalEvents().then(() => {
-            $eventMinimalStore.map((event) => {
-                let eventMarker = new maplibregl.Marker()
-                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1>'))
-                    .setLngLat([event!.start_longitude!, event!.start_latitude!]);
-                eventMarker.addClassName('event-marker');
-                eventMarker.addTo(map);
-            });
-        });
+        debugLine += " - socket: " + socket;
 
         if (navigator.geolocation) {
 
+            debugLine += " - navigator.geolocation is available";
             navigator.geolocation.watchPosition(
                 (position) => {
                     const {latitude, longitude, speed} = position.coords;
@@ -57,6 +52,7 @@
                     socket.emit('locationUpdate', userLocation);
 
                     if (!userMarker) {
+
                         let popup = new maplibregl.Popup();
                         popup.setHTML('<h1>You are here</h1>')._closeButton.classList.add('d-none')
 
@@ -82,6 +78,8 @@
                         userMarker.setLngLat([longitude, latitude]);
                     }
 
+                    debugLine += " - userMarker: true";
+
                     map.setCenter([longitude, latitude]);
                 },
                 (error) => {
@@ -96,6 +94,16 @@
             toast.push('Geolocation is not available in your browser');
             console.error('Geolocation is not available');
         }
+
+        fetchMinimalEvents().then(() => {
+            $eventMinimalStore.map((event) => {
+                let eventMarker = new maplibregl.Marker()
+                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1>'))
+                    .setLngLat([event!.start_longitude!, event!.start_latitude!]);
+                eventMarker.addClassName('event-marker');
+                eventMarker.addTo(map);
+            });
+        });
 
         socket.on('userLocations', (locations: any) => {
             console.log('Updated user locations:', locations);
@@ -122,16 +130,8 @@
 
 
         initRevlineMap();
+        console.log(debugLine);
     });
-
-    const loadEvents = async () => {
-        // fetch events
-        try {
-            return await fetchMinimalEvents();
-        } catch (error) {
-            console.error('Error fetching events:', error);
-        }
-    }
 
     onDestroy(() => {
         if (map) {
