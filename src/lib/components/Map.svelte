@@ -6,6 +6,7 @@
     import {authStore} from '$lib/stores/authStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
+    import {Speedometer} from "$lib/components/ui/speedometer";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
     let map: any;
@@ -14,6 +15,7 @@
     let socket: any;
     let errorMessage = $state('');
     let showMap = $state(true);
+    let calculatedSpeed =  $state(0);
 
 
     const initRevlineMap = () => {
@@ -46,8 +48,10 @@
 
             navigator.geolocation.watchPosition(
                 (position) => {
-                    const {latitude, longitude} = position.coords;
+                    const {latitude, longitude, speed} = position.coords;
                     const userLocation = {lat: latitude, lng: longitude, userId: $authStore.user?.id};
+
+                    calculatedSpeed = speed !== null ? speed * 3.6 : 0;
 
                     socket.emit('locationUpdate', userLocation);
 
@@ -162,6 +166,7 @@
 </script>
 
 {#if showMap}
+    <Speedometer calculatedSpeed={calculatedSpeed}/>
     <div id="map" style="width: 100%; height: 100vh;"></div>
 {:else}
     <BlockScreen fullscreen={true} text={errorMessage}/>
