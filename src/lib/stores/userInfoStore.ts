@@ -15,23 +15,24 @@ export async function fetchUserInfo(userId: string) {
     try {
         const userInfo = await pb.collection('user_info').getOne(userId);
         userInfoStore.set(userInfo);
+
         // Fetch vehicles if available
         if (userInfo.vehicles?.length > 0) {
-            fetchUserVehicles(userInfo.vehicles);
+            await fetchUserVehicles(userInfo.vehicles);
         } else {
             userVehiclesStore.set([]); // No vehicles
         }
 
         // Fetch upcoming events if available
         if (userInfo.upcoming_events?.length > 0) {
-            fetchUserEvents(userInfo.upcoming_events, userUpcomingEventsStore);
+            await fetchUserEvents(userInfo.upcoming_events, userUpcomingEventsStore);
         } else {
             userUpcomingEventsStore.set([]); // No upcoming events
         }
 
         // Fetch past events if available
         if (userInfo.past_events?.length > 0) {
-            fetchUserEvents(userInfo.past_events, userPastEventsStore);
+            await fetchUserEvents(userInfo.past_events, userPastEventsStore);
         } else {
             userPastEventsStore.set([]); // No past events
         }
