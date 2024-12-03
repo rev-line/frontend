@@ -5,6 +5,7 @@
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
+    import * as Select from "$lib/components/ui/select";
 
 
     let image = $state('');
@@ -12,6 +13,9 @@
     let hangout = $state(true);
     let rideout = $state(true);
     let radius = $state(50);
+    let pref_driving = $state(false);
+    let pref_hosting = $state(false);
+    let mapIcon = $state("Car");
 
     onMount(() => {
        authStore.subscribe(() => {
@@ -25,6 +29,9 @@
                     hangout = !!userInformation.looking_hangouts;
                     rideout = !!userInformation.looking_rideouts;
                     radius = userInformation.radius ? userInformation.radius : 25;
+                    pref_driving = !!userInformation.pref_driving;
+                    pref_hosting = !!userInformation.pref_hosting;
+                    mapIcon = userInformation.mapIconChoice ? userInformation.mapIconChoice : 'Car';
                }
 
            });
@@ -44,7 +51,10 @@
         await updateUserInfo($userInfoStore!.id, {
             looking_hangouts: hangout,
             looking_rideouts: rideout,
-            radius: radius
+            radius: radius,
+            pref_driving: pref_driving,
+            pref_hosting: pref_hosting,
+            mapIconChoice: mapIcon == "Car" ? "Car" : "Motorcycle"
         });
     }
 </script>
@@ -67,7 +77,7 @@
 </style>
 
 <div class="container flex justify-center">
-    <Card.Root class="w-1/2 m-12">
+    <Card.Root class="w-1/2 mb-24 mt-12">
         <Card.Header>
             <Card.Title>My Profile</Card.Title>
         </Card.Header>
@@ -80,17 +90,37 @@
                 {/if}
 
                 <input type="text" placeholder="username" class="form-control" bind:value={username} />
-                <div class="form-check form-switch">
+                <div class="form-check form-switch my-1">
                     <input class="form-check-input" type="checkbox" id="switchHangout" bind:checked={hangout} />
                     <label class="form-check-label" for="switchHangout">Look for hangouts</label>
                 </div>
-                <div class="form-check form-switch">
+                <div class="form-check form-switch my-1">
                     <input class="form-check-input" type="checkbox" id="switchRideout" bind:checked={rideout} />
                     <label class="form-check-label" for="switchRideout">Look for rideouts</label>
                 </div>
-                <label for="radius">Event search radius</label>
-                <input type="number" min="0" placeholder="radius" class="form-control" bind:value={radius} />
-
+                <div class="my-1">
+                    <label for="radius">Event search radius</label>
+                    <input type="number" min="0" placeholder="radius" class="form-control" bind:value={radius} />
+                </div>
+                <div class="form-check form-switch my-1">
+                    <input class="form-check-input" type="checkbox" id="pref_driving" bind:checked={pref_driving} />
+                    <label class="form-check-label" for="pref_driving">Prefer driving</label>
+                </div>
+                <div class="form-check form-switch my-1">
+                    <input class="form-check-input" type="checkbox" id="pref_hosting" bind:checked={pref_hosting} />
+                    <label class="form-check-label" for="pref_hosting">Prefer hosting</label>
+                </div>
+                <div class="mb-4">
+                    <Select.Root>
+                        <Select.Trigger class="">
+                            <Select.Value placeholder={mapIcon} />
+                        </Select.Trigger>
+                        <Select.Content class="bg-white">
+                            <Select.Item on:click={() => mapIcon = "Car"} value="Car">Car</Select.Item>
+                            <Select.Item on:click={() => mapIcon = "Motorcycle"} value="Motorcycle">Motorcycle</Select.Item>
+                        </Select.Content>
+                    </Select.Root>
+                </div>
                 <a href="/my-profile/vehicle" class="btn btn-primary">Edit Vehicle</a>
 
                 <div class="d-flex flex-row gap-2 mt-2">

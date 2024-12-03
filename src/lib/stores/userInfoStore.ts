@@ -141,7 +141,6 @@ export async function updateUserInfo(userInformation_id: string, updates: Partia
     }
 }
 
-// Subscribe to authStore for automatic user info fetching
 authStore.subscribe((authState) => {
     if (authState.isAuthenticated && authState.user) {
         fetchUserInfo(authState.user.user_informations).then();

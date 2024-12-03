@@ -12,5 +12,5 @@ export default interface UserInfo {
     upcoming_events?: string[]; // Array of event references
     past_events?: string[]; // Array of event references
     collectionId: string;
-    mapIconChoice?: "Car" | "Motorcycle";
+    mapIconChoice: "Car" | "Motorcycle";
 }
