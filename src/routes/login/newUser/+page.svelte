@@ -15,7 +15,6 @@
 
             if($authStore.user)
                 await createUserInfo();
-                console.log("THIS IS MY AWESOME ID: ", $userInfoStore?.id);
                 await linkUserInformation($authStore?.user.id, $userInfoStore?.id);
                 goto('/');
         } catch (error) {

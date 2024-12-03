@@ -1,6 +1,6 @@
 <script lang="ts">
     import {logout} from "$lib/stores/authStore";
-    import {userInfoStore, updateUserInfo} from "$lib/stores/userInfoStore";
+    import {userInfoStore, updateUserInfo, updateUserInfoPhoto} from "$lib/stores/userInfoStore";
     import {authStore,updateUsername} from "$lib/stores/authStore";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
@@ -45,9 +45,23 @@
             goto("/login");
     }
 
+    var handleProfileImageChange = function(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            image = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    };
+
     async function handleSave() {
         await updateUsername($authStore.user!.id, username);
+        let fileInput = document.getElementById("fileInput");
+        let formData = new FormData();
+        let imageData = fileInput?.files[0];
 
+        formData.append("Photo", imageData);
+
+        console.log(typeof(imageData));
         await updateUserInfo($userInfoStore!.id, {
             looking_hangouts: hangout,
             looking_rideouts: rideout,
@@ -56,6 +70,9 @@
             pref_hosting: pref_hosting,
             mapIconChoice: mapIcon == "Car" ? "Car" : "Motorcycle"
         });
+
+        //update Photo seperately, as it requires FormData for uploading to pb
+        await updateUserInfoPhoto($userInfoStore!.id, formData);
     }
 </script>
 
@@ -82,7 +99,8 @@
             <Card.Title>My Profile</Card.Title>
         </Card.Header>
         <Card.Content>
-            <form class="profile-form d-flex flex-column gap-2 mt-4">
+            <form id="userForm" class="profile-form d-flex flex-column gap-2 mt-4">
+                <input id="fileInput" type="file" onchange={handleProfileImageChange} accept="image/*" />
                 {#if image}
                     <img src={image ?? 'empty-user.png'} alt="profile" class="profile-img mb-4">
                 {:else}
