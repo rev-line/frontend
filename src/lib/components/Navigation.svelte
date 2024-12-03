@@ -1,6 +1,6 @@
 <script>
     import {BadgePlus, LogIn, Map, SquareChartGantt, UserPen} from "lucide-svelte";
-    import {authStore} from "$lib/stores/authStore.ts";
+    import {authStore} from "$lib/stores/authStore";
 </script>
 
 <div class="navigation justify-content-center">

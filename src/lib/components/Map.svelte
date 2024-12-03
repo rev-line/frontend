@@ -1,26 +1,20 @@
 <script lang="ts">
-    import { MapLibre } from 'svelte-maplibre';
-    import { onMount, onDestroy } from 'svelte';
+    import {onDestroy, onMount} from 'svelte';
     import maplibregl from 'maplibre-gl';
-    import { io } from 'socket.io-client';
+    import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
-    import { authStore } from '$lib/stores/authStore';
+    import {authStore} from '$lib/stores/authStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
-    let { defaultLat, defaultLng, tileSheet } = $props();
+    import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
+
+    let {defaultLat, defaultLng, tileSheet} = $props();
     let map: any;
     let userMarker: any;
     let otherUserMarkers = new Map<string, maplibregl.Marker>();
     let socket: any;
-    let errorMessage =  $state('');
+    let errorMessage = $state('');
     let showMap = $state(true);
 
-    if(!$authStore.isAuthenticated) {
-        // this way, we can verify the status is actually correct before showing the error message
-        setTimeout(() => {
-            errorMessage = 'Please log in to use this feature.';
-            showMap = false;
-        }, 750);
-    }
 
     const initRevlineMap = () => {
         map = new maplibregl.Map({
@@ -33,22 +27,36 @@
         // placeholder
         socket = io('https://revline-express.programar.io/');
 
-        if(!socket) {
+        if (!socket) {
             toast.push('Could not establish socket connection.');
             showMap = false;
         }
 
+        fetchMinimalEvents().then(() => {
+            $eventMinimalStore.map((event) => {
+                let eventMarker = new maplibregl.Marker()
+                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1>'))
+                    .setLngLat([event!.start_longitude!, event!.start_latitude!]);
+                eventMarker.addClassName('event-marker');
+                eventMarker.addTo(map);
+            });
+        });
+
         if (navigator.geolocation) {
+
             navigator.geolocation.watchPosition(
                 (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const userLocation = { lat: latitude, lng: longitude, userId: $authStore.user?.id};
+                    const {latitude, longitude} = position.coords;
+                    const userLocation = {lat: latitude, lng: longitude, userId: $authStore.user?.id};
 
                     socket.emit('locationUpdate', userLocation);
 
                     if (!userMarker) {
-                        userMarker = new maplibregl.Marker({ color: 'blue', className: 'self-user-marker' })
-                            .setPopup(new maplibregl.Popup().setHTML('<h1>You are here</h1>'))
+                        let popup = new maplibregl.Popup();
+                        popup.setHTML('<h1>You are here</h1>')._closeButton.classList.add('d-none')
+
+                        userMarker = new maplibregl.Marker({color: 'blue', className: 'self-user-marker'})
+                            .setPopup(popup)
                             .setLngLat([longitude, latitude])
                             .addTo(map);
                     } else {
@@ -63,7 +71,7 @@
                     errorMessage = 'Please allow location access to use this feature.';
                     showMap = false;
                 },
-                { enableHighAccuracy: true }
+                {enableHighAccuracy: true}
             );
         } else {
             toast.push('Geolocation is not available in your browser');
@@ -77,19 +85,38 @@
     }
 
 
-
     onMount(() => {
-        if(!$authStore.isAuthenticated) {
+        if (!$authStore.isAuthenticated) {
             errorMessage = 'Please log in to use this feature.';
             showMap = false;
             return;
         }
+
+        if (window) {
+            // get query params
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+            if (eventId) {
+                console.log('Event ID: ', atob(eventId));
+            }
+        }
+
+
         initRevlineMap();
     });
 
+    const loadEvents = async () => {
+        // fetch events
+        try {
+            return await fetchMinimalEvents();
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }
+
     onDestroy(() => {
-        if(map) {
-            map.destroy();
+        if (map) {
+            map.remove();
         }
 
         if (socket) {
@@ -112,10 +139,12 @@
             existingIds.add(id);
 
             if (!otherUserMarkers.has(id)) {
-                const marker = new maplibregl.Marker({ color: 'red' })
+                let marker = new maplibregl.Marker({color: 'red'})
                     .setPopup(new maplibregl.Popup().setHTML('<h1>' + location.userId + '</h1>'))
                     .setLngLat([location.lng, location.lat])
                     .addTo(map);
+
+                marker.addClassName('user-marker');
 
                 otherUserMarkers.set(id, marker);
             } else {
@@ -133,8 +162,8 @@
 </script>
 
 {#if showMap}
-    <div id="map" style="width: 100%; height: 100vh;"> </div>
-    {:else}
-    <BlockScreen fullscreen={true} text={errorMessage} />
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+{:else}
+    <BlockScreen fullscreen={true} text={errorMessage}/>
 {/if}
 

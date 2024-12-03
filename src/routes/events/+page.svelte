@@ -8,8 +8,8 @@
         fetchMinimalEvents();
     })
 
-    function handleRedirectDetailView(){
-        goto('/');
+    function handleRedirectDetailView(id){
+        goto('/?event=' + btoa(id));
     }
 </script>
 
@@ -18,7 +18,7 @@
 
     {#if $eventMinimalStore.length > 0}
             {#each $eventMinimalStore as event}
-                <button class="w-3/4" on:click={handleRedirectDetailView}>
+                <a on:click={() => handleRedirectDetailView(event.id)}>
                     <Card.Root class="mt-2" >
                         <Card.Header>
                             <Card.Title>{event.name}</Card.Title>
@@ -36,7 +36,8 @@
                             <p>Max people: {event.max_people}</p>
                         </Card.Content>
                     </Card.Root>
-                </button>
+                </a>
+
             {/each}
     {/if}
 </div>

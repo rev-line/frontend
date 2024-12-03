@@ -28,3 +28,31 @@ html, body {
 .self-user-marker {
   z-index: 9999;
 }
+
+.nav-spacer {
+  padding-bottom: 75px!important;
+}
+
+.maplibregl-marker svg {
+  visibility: hidden;
+}
+
+.maplibregl-marker.event-marker {
+  background: url("hotspot.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.user-marker {
+  background: url("car.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.self-user-marker {
+  background: url("car-current.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.user-marker-motorcycle {
+  background: url("motorcycle.svg") no-repeat center bottom;
+}
+
+.maplibregl-marker.self-user-marker-motorcycle {
+  background: url("motorcycle-current.svg") no-repeat center bottom;
+}

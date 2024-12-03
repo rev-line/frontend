@@ -30,7 +30,7 @@
 </script>
 
 
-<div class="container mx-auto max-w-lg p-6 bg-white shadow-md rounded-md">
+<div class="container mx-auto max-w-lg p-6 bg-white shadow-md rounded-md nav-spacer">
     <h1 class="text-3xl font-bold text-center mb-6">Create Event</h1>
     <form on:submit|preventDefault={handleSubmit} class="space-y-4">
         <!-- Name -->
