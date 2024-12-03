@@ -4,6 +4,7 @@
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
     import {authStore} from '$lib/stores/authStore';
+    import {fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
     import {Speedometer} from "$lib/components/ui/speedometer";
@@ -59,10 +60,24 @@
                         let popup = new maplibregl.Popup();
                         popup.setHTML('<h1>You are here</h1>')._closeButton.classList.add('d-none')
 
-                        userMarker = new maplibregl.Marker({color: 'blue', className: 'self-user-marker'})
+                        userMarker = new maplibregl.Marker({className: `self-user-marker`})
                             .setPopup(popup)
                             .setLngLat([longitude, latitude])
                             .addTo(map);
+
+                        userInfoStore.subscribe(() => {
+                            let isMotorcycle = $userInfoStore?.mapIconChoice === 'Motorcycle';
+
+                            console.log($userInfoStore, $userInfoStore?.mapIconChoice, isMotorcycle);
+
+                            if (isMotorcycle) {
+                                userMarker.removeClassName('self-user-marker');
+                                userMarker.addClassName('self-user-marker-motorcycle');
+                            } else {
+                                userMarker.removeClassName('self-user-marker-motorcycle');
+                                userMarker.addClassName('self-user-marker');
+                            }
+                        })
                     } else {
                         userMarker.setLngLat([longitude, latitude]);
                     }
@@ -148,7 +163,14 @@
                     .setLngLat([location.lng, location.lat])
                     .addTo(map);
 
-                marker.addClassName('user-marker');
+                marker.addClassName("user-marker");
+
+                fetchUserInfoForOther(location.userId).then((userInfo) => {
+                    if (userInfo?.mapIconChoice === 'Motorcycle') {
+                        marker.removeClassName("user-marker");
+                        marker.addClassName('user-marker-motorcycle');
+                    }
+                });
 
                 otherUserMarkers.set(id, marker);
             } else {

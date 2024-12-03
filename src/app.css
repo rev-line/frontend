@@ -30,7 +30,11 @@ html, body {
 }
 
 .nav-spacer {
-  padding-bottom: 75px!important;
+  padding-bottom: calc(24px + 2rem + 1rem);
+}
+
+.w-inherit {
+  width: inherit;
 }
 
 .maplibregl-marker svg {

@@ -45,6 +45,18 @@ export async function fetchUserInfo(userId: string) {
     }
 }
 
+export async function fetchUserInfoForOther(userId: string) {
+    try {
+        return await pb.collection('user_info').getOne(userId);
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        userInfoStore.set(null);
+        userVehiclesStore.set([]);
+        userUpcomingEventsStore.set([]);
+        userPastEventsStore.set([]);
+    }
+}
+
 export async function fetchUserVehicles(vehicleIds: string[]) {
     try {
         const vehiclePromises = vehicleIds.map((id) =>

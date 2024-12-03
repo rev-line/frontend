@@ -2,24 +2,20 @@
     import { eventMinimalStore, fetchMinimalEvents } from "$lib/stores/eventMinimalStore";
     import {onMount} from "svelte";
     import * as Card from "$lib/components/ui/card";
-    import {goto} from "$app/navigation";
 
     onMount(() => {
         fetchMinimalEvents();
     })
-
-    function handleRedirectDetailView(id){
-        goto('/?event=' + btoa(id));
-    }
 </script>
 
-<div class="container flex flex-col justify-center items-center">
-    <h1 class="text-3xl"> Events </h1>
+<div class="container flex flex-col justify-center items-center nav-spacer">
+    <h1 class="text-3xl mb-4"> Events </h1>
 
     {#if $eventMinimalStore.length > 0}
+        <div class="d-flex flex-column gap-4 align-items-center w-100">
             {#each $eventMinimalStore as event}
-                <a on:click={() => handleRedirectDetailView(event.id)}>
-                    <Card.Root class="mt-2" >
+                <a href={'/?events=' + btoa(event.id)} class="max-w-96 w-inherit">
+                    <Card.Root>
                         <Card.Header>
                             <Card.Title>{event.name}</Card.Title>
                             <Card.Description>
@@ -37,8 +33,7 @@
                         </Card.Content>
                     </Card.Root>
                 </a>
-
             {/each}
+        </div>
     {/if}
 </div>
-
