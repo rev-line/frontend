@@ -42,21 +42,21 @@ html, body {
 }
 
 .maplibregl-marker.event-marker {
-  background: url("/static/hotspot.svg") no-repeat center bottom;
+  background: url("/public/hotspot.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.user-marker {
-  background: url("/static/car.svg") no-repeat center bottom;
+  background: url("/public/car.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker {
-  background: url("/static/car-current.svg") no-repeat center bottom;
+  background: url("/public/car-current.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.user-marker-motorcycle {
-  background: url("/static/motorcycle.svg") no-repeat center bottom;
+  background: url("/public/motorcycle.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker-motorcycle {
-  background: url("/static/motorcycle-current.svg") no-repeat center bottom;
+  background: url("/public/motorcycle-current.svg") no-repeat center bottom;
 }
