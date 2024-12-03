@@ -8,6 +8,8 @@
     import {Input} from "$lib/components/ui/input";
 
     let vehicles:Array<IVehicle> = $state([]);
+    let newVehicles: Array<IVehicle> = $state([]);
+    let markedVehiclesToDelete: Array<string> = $state([]);
 
     let newVehicle = $state({brand:"", type:""});
 
@@ -25,15 +27,30 @@
     async function handleSave(){
         await updateVehicles(vehicles);
 
+        for(let vehicle of newVehicles){
+            let brand = vehicle.brand ? vehicle.brand : "";
+            let type = vehicle.type ? vehicle.type : "";
+
+            await createVehicle($authStore.user?.user_informations, {brand, type});
+        }
+
+        for(let vehicleId of markedVehiclesToDelete){
+            await deleteVehicle(vehicleId, $authStore.user?.user_informations);
+        }
+
         goto("/my-profile");
+    }
+
+    async function removeNewVehicleFromList(id:string){
+        newVehicles = newVehicles.filter((vehicle) => vehicle.id !== id);
     }
 
     async function handleNewVehicle(){
         let brand = newVehicle.brand;
         let type = newVehicle.type;
+        let id = crypto.randomUUID();
 
-        await createVehicle($authStore.user?.user_informations, {brand, type});
-        vehicles = $userVehiclesStore;
+        newVehicles.push({id,brand, type});
 
         clearNewVehicle();
     }
@@ -43,10 +60,12 @@
         newVehicle.type = "";
     }
 
-    async function handleDelete(vehicleId:string){
-        await deleteVehicle(vehicleId, $authStore.user?.user_informations);
+    async function handleMarkForDeletion(vehicleId:string){
+        markedVehiclesToDelete.push(vehicleId);
+    }
 
-        vehicles = $userVehiclesStore;
+    async function removeFromMarkedForDeletion(vehicleId:string){
+        markedVehiclesToDelete = markedVehiclesToDelete.filter((id) => id !== vehicleId);
     }
 
 </script>
@@ -69,7 +88,29 @@
                                 <Input name="type" placeholder="vehicle type" bind:value={vehicle.type}/>
                             </div>
                             <div class="flex justify-end gap-2 mt-4">
-                                <button onclick={async () => await handleDelete(vehicle.id)} class="btn btn-danger">Delete</button>
+                                {#if !markedVehiclesToDelete.includes(vehicle.id)}
+                                    <button onclick={async () => await handleMarkForDeletion(vehicle.id)} class="btn btn-danger">Add deletion mark</button>
+                                {:else}
+                                    <button onclick={async () => await removeFromMarkedForDeletion(vehicle.id)} class="btn btn-success">Remove deletion mark</button>
+                                {/if}
+                            </div>
+                        </Card.Content>
+                    </Card.Root>
+                {/each}
+                {#each newVehicles as vehicle}
+                    <Card.Root class="m-4">
+                        <Card.Content>
+                            <div class="my-2">
+                                <label for="brand">Brand</label>
+                                <Input name="brand" placeholder="vehicle brand" bind:value={vehicle.brand}/>
+                            </div>
+                            <div class="my-2">
+                                <label for="type">Type</label>
+                                <Input name="type" placeholder="vehicle type" bind:value={vehicle.type}/>
+                            </div>
+                            <div class="flex flex-col justify-end gap-2 mt-4">
+                                <p>This vehicle is not saved yet. To save changes click "save changes"</p>
+                                <button onclick={async () => await removeNewVehicleFromList(vehicle.id)} class="btn btn-danger">Remove vehicle</button>
                             </div>
                         </Card.Content>
                     </Card.Root>
@@ -96,6 +137,7 @@
             </Card.Root>
 
             <button onclick={handleSave} class="btn btn-primary">Save changes</button>
+            <button onclick={() => goto("/my-profile")} class="btn btn-danger">cancel</button>
         </Card.Content>
     </Card.Root>
 </div>
