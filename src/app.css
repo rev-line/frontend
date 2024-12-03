@@ -30,7 +30,11 @@ html, body {
 }
 
 .nav-spacer {
-  padding-bottom: 75px!important;
+  padding-bottom: calc(24px + 2rem + 1rem);
+}
+
+.w-inherit {
+  width: inherit;
 }
 
 .maplibregl-marker svg {
@@ -38,21 +42,21 @@ html, body {
 }
 
 .maplibregl-marker.event-marker {
-  background: url("hotspot.svg") no-repeat center bottom;
+  background: url("/static/hotspot.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.user-marker {
-  background: url("car.svg") no-repeat center bottom;
+  background: url("/static/car.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker {
-  background: url("car-current.svg") no-repeat center bottom;
+  background: url("/static/car-current.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.user-marker-motorcycle {
-  background: url("motorcycle.svg") no-repeat center bottom;
+  background: url("/static/motorcycle.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker-motorcycle {
-  background: url("motorcycle-current.svg") no-repeat center bottom;
+  background: url("/static/motorcycle-current.svg") no-repeat center bottom;
 }
