@@ -71,6 +71,64 @@ export async function fetchUserEvents(eventIds: string[], targetStore: typeof us
     }
 }
 
+export async function deleteVehicle(vehicleId: string, userInfoId: string) {
+    try {
+        await pb.collection('vehicle').delete(vehicleId);
+        const userInfo = await pb.collection('user_info').getOne<IUserInfo>(userInfoId);
+        const updatedVehicles = userInfo.vehicles?.filter((id) => id !== vehicleId) || [];
+        await pb.collection('user_info').update(userInfoId, { vehicles: updatedVehicles });
+
+        userVehiclesStore.update((vehicles) => vehicles.filter((vehicle) => vehicle.id !== vehicleId));
+    } catch (error) {
+        console.error('Error deleting vehicle:', error);
+    }
+}
+
+export async function updateVehicles(vehicles: IVehicle[]) {
+    try {
+        const updatePromises = vehicles.map((vehicle) =>
+            pb.collection('vehicle').update(vehicle.id, {
+                type: vehicle.type,
+                brand: vehicle.brand,
+            })
+        );
+        await Promise.all(updatePromises);
+
+        // Update the store with the new vehicles
+        userVehiclesStore.set(vehicles);
+    } catch (error) {
+        console.error('Error updating vehicles:', error);
+    }
+}
+
+export async function createVehicle(
+    userInfoId: string,
+    vehicle: { type: string; brand: string }
+) {
+    try {
+        const newVehicle = await pb.collection('vehicle').create({
+            type: vehicle.type,
+            brand: vehicle.brand,
+        });
+
+        const userInfo = await pb.collection('user_info').getOne<IUserInfo>(userInfoId);
+        const updatedVehicleIds = [...(userInfo.vehicles || []), newVehicle.id];
+        await pb.collection('user_info').update(userInfoId, { vehicles: updatedVehicleIds });
+        userVehiclesStore.update((vehicles) => [...vehicles, newVehicle]);
+    } catch (error) {
+        console.error('Error creating vehicle:', error);
+    }
+}
+
+export async function updateUserInfo(userInformation_id: string, updates: Partial<IUserInfo>) {
+    try {
+        const updatedUserInfo = await pb.collection('user_info').update(userInformation_id, updates);
+        userInfoStore.set(updatedUserInfo);
+    } catch (error) {
+        console.error('Error updating user information:', error);
+    }
+}
+
 // Subscribe to authStore for automatic user info fetching
 authStore.subscribe((authState) => {
     if (authState.isAuthenticated && authState.user) {

@@ -61,6 +61,22 @@ export const createUser = async (email: string, password: string): Promise<void>
 	}
 };
 
+export async function updateUsername(userId: string, newUsername: string) {
+	try {
+		const currentUser = await pb.collection('users').getOne(userId);
+
+		if (currentUser.username !== newUsername) {
+			 await pb.collection('users').update(userId, {
+				username: newUsername,
+			 });
+		} else {
+			console.log('The new username is the same as the current username. No update performed.');
+		}
+	} catch (error) {
+		console.error('Error updating username:', error);
+	}
+}
+
 export const linkUserInformation = async (userId: string, userInformationId: string) => {
 	if(pb.authStore.model?.id === null || pb.authStore.model?.id !== userId){
 		console.log("You are not loggedin");
