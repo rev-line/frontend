@@ -34,9 +34,9 @@ html, body {
 }
 
 .maplibregl-marker {
-  background: url("car.svg") no-repeat;
+  background: url("car.svg") no-repeat center bottom;
 }
 
 .maplibregl-marker.self-user-marker {
-  background: url("car-current.svg") no-repeat;
+  background: url("car-current.svg") no-repeat center bottom;
 }
