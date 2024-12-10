@@ -71,7 +71,7 @@
 </script>
 
 <div class="container flex justify-center">
-    <Card.Root class="w-1/2 m-12">
+    <Card.Root class="w-4/5 m-12">
         <Card.Header>
             <Card.Title>Vehicle</Card.Title>
         </Card.Header>

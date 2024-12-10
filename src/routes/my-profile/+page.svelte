@@ -96,7 +96,7 @@
 </style>
 
 <div class="container flex justify-center">
-    <Card.Root class="w-1/2 mb-24 mt-12">
+    <Card.Root class="w-4/5 mb-24 mt-12">
         <Card.Header>
             <Card.Title>My Profile</Card.Title>
         </Card.Header>
