@@ -140,15 +140,6 @@ export async function updateUserInfo(userInformation_id: string, updates: Partia
         console.error('Error updating user information:', error);
     }
 }
-//update Photo using FormData, as need to be handled differently
-export async function updateUserInfoPhoto(userInformation_id: string, updates: FormData) {
-    try {
-        const updatedUserInfo = await pb.collection('user_info').update(userInformation_id, updates);
-        userInfoStore.set(updatedUserInfo);
-    } catch (error) {
-        console.error('Error updating user information:', error);
-    }
-}
 
 export async function createUserInfo() {
     try {
