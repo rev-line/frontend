@@ -5,7 +5,8 @@
     import {userInfoStore, createUserInfo} from "$lib/stores/userInfoStore";
     import {goto} from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
-    import {Label} from "bits-ui";
+    import { z } from 'zod';
+    import { schema } from '$lib/schemas/registrationSchema';
 
     let email: string = '';
     let password: string = '';
@@ -15,26 +16,34 @@
 
     let register_error = false;
     let error_msg = '';
+    let errors = {};
 
     async function createNewUser(){
         try {
-            await createUser(email, password);
+            const result = schema.safeParse({ email, password });
+            error_msg = '';
+            if (result.success) {
+                await createUser(email, password);
 
-            if($authStore.user)
-                await createUserInfo();
+                if($authStore.user)
+                    await createUserInfo();
                 await linkUserInformation($authStore?.user.id, $userInfoStore?.id);
-                goto('/');
+                goto('/my-profile');
+                errors = {}; // Clear previous errors
+            } else {
+                register_error = true;
+                errors = result.error.format();
+                if (errors.email) {
+                    error_msg += errors.email._errors[0];
+                }
+                if (errors.password) {
+                    error_msg += errors.password._errors[0];
+                }
+            }
+
         } catch (error) {
             console.error('Login error:', error);
-            error_msg = '';
-            if (!email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
-                error_msg += 'Invalid email address. ';
-                email = '';
-            }
-            if (password.length < 8) {
-                error_msg += 'Password must be at least 8 characters long. ';
-                password = '';
-            }
+            error_msg = 'An unexpected error occurred';
             register_error = true;
         }
     }
