@@ -22,7 +22,7 @@
 </script>
 
 <div class="flex justify-center items-center h-screen">
-    <Card.Root class="w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/3 xl:w-1/4">
+    <Card.Root class="w-1/2 sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4">
         <Card.Header>
             <Card.Title>Login</Card.Title>
         </Card.Header>
@@ -31,8 +31,8 @@
                 <Input type="text" bind:value={email} placeholder="Email" />
                 <Input type="password" bind:value={password} placeholder="Password" />
                 <div class="flex justify-around mt-2">
-                    <Button on:click={handleLogin} class={`${buttonVariants({ variant: "outline" })} w-2/5`}>Login</Button>
-                    <Button href="/login/newUser" class={`${buttonVariants({ variant: "outline" })} w-2/5`}>Register</Button>
+                    <Button on:click={handleLogin} class={`${buttonVariants({ variant: "outline" })} w-3/5`}>Login</Button>
+                    <Button href="/login/newUser" class={`${buttonVariants({ variant: "outline" })} w-3/5`}>Register</Button>
                 </div>
             </form>
         </Card.Content>
