@@ -5,8 +5,8 @@
     import {userInfoStore, createUserInfo} from "$lib/stores/userInfoStore";
     import {goto} from "$app/navigation";
     import * as Card from "$lib/components/ui/card";
-    import { z } from 'zod';
     import { schema } from '$lib/schemas/registrationSchema';
+    import {toast} from "@zerodevx/svelte-toast";
 
     let email: string = '';
     let password: string = '';
@@ -29,6 +29,7 @@
                     await createUserInfo();
                 await linkUserInformation($authStore?.user.id, $userInfoStore?.id);
                 goto('/my-profile');
+                toast.push('Registration successful!');
                 errors = {}; // Clear previous errors
             } else {
                 register_error = true;

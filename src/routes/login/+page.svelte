@@ -5,6 +5,7 @@
     import {authStore, login} from "$lib/stores/authStore";
     import {goto} from "$app/navigation";
     import {schema} from "$lib/schemas/loginSchema";
+    import { toast } from '@zerodevx/svelte-toast'
 
     let email: string = '';
     let password: string = '';
@@ -18,8 +19,10 @@
             if (result.success) {
                 await login(email, password);
 
-                if($authStore.user)
+                if($authStore.user) {
                     await goto('/');
+                    toast.push('Login successful!');
+                }
                 else {
                     error_msg = 'Invalid login credentials!';
                     login_error = true;
