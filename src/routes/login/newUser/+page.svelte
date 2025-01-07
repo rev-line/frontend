@@ -42,7 +42,7 @@
             }
 
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Registration error:', error);
             error_msg = 'An unexpected error occurred';
             register_error = true;
         }
