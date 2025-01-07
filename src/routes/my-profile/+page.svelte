@@ -102,7 +102,8 @@
         </Card.Header>
         <Card.Content>
             <form id="userForm" class="profile-form d-flex flex-column gap-2 mt-4">
-                <input id="fileInput" type="file" onchange={handleProfileImageChange} accept="image/*" />
+                <label class="btn border w-fit" for="fileInput">Upload Picture</label>
+                <input id="fileInput" type="file" style="display:none"  onchange={handleProfileImageChange} accept="image/*" />
                 {#if image}
                     {#if visible}
                         <div class="flex z-50 gap-8 justify-between items-start py-3 px-4 w-full bg-gray-50 border border-b border-gray-200 sm:items-center dark:border-gray-700 lg:py-4 dark:bg-gray-800">
