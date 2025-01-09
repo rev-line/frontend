@@ -92,4 +92,13 @@ export const linkUserInformation = async (userId: string, userInformationId: str
 	}
 }
 
+export const getUserNameById = async (userId: string) => {
+	try {
+		const user = await pb.collection('users').getOne(userId);
+		return user.username;
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 initAuth();

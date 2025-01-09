@@ -3,7 +3,7 @@
     import maplibregl from 'maplibre-gl';
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
-    import {authStore} from '$lib/stores/authStore';
+    import {authStore, getUserNameById} from '$lib/stores/authStore';
     import {fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
@@ -159,9 +159,14 @@
 
             if (!otherUserMarkers.has(id)) {
                 let marker = new maplibregl.Marker({color: 'red'})
-                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + location.userId + '</h1>'))
-                    .setLngLat([location.lng, location.lat])
-                    .addTo(map);
+                
+                getUserNameById(location.userId).then((name) => {
+                    if (name) {
+                        marker.setPopup(new maplibregl.Popup().setHTML('<h1>' + name + '</h1>'))
+                            .setLngLat([location.lng, location.lat])
+                            .addTo(map);
+                    }
+                })
 
                 marker.addClassName("user-marker");
 
