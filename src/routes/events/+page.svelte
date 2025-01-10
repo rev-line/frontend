@@ -14,7 +14,7 @@
     {#if $eventMinimalStore.length > 0}
         <div class="d-flex flex-column gap-4 align-items-center w-100">
             {#each $eventMinimalStore as event}
-                <a href={'/?events=' + btoa(event.id)} class="max-w-96 w-inherit">
+                <a href={'/?event=' + btoa(event.id) + (event.start_latitude ? ('&defaultLat=' + event.start_latitude) : '') + (event.start_longitude ? ('&defaultLng=' + event.start_longitude) : '')} class="max-w-96 w-inherit">
                     <Card.Root>
                         <Card.Header>
                             <Card.Title>{event.name}</Card.Title>
