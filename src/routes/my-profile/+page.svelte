@@ -65,7 +65,6 @@
     async function handleSave() {
         await updateUsername($authStore.user!.id, username);
 
-        console.log(typeof(imageData));
         await updateUserInfo($userInfoStore!.id, {
             Photo: imageData,
             looking_hangouts: hangout,

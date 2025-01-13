@@ -92,6 +92,15 @@ export const linkUserInformation = async (userId: string, userInformationId: str
 	}
 }
 
+export const getUserInformationId = async (userId: string) => {
+	try {
+		const user = await pb.collection('users').getOne(userId);
+		return user.user_informations;
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 export const getUserNameById = async (userId: string) => {
 	try {
 		const user = await pb.collection('users').getOne(userId);

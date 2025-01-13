@@ -3,7 +3,7 @@
     import maplibregl from 'maplibre-gl';
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
-    import {authStore, getUserNameById} from '$lib/stores/authStore';
+    import {authStore, getUserInformationId, getUserNameById} from '$lib/stores/authStore';
     import {fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
@@ -159,12 +159,18 @@
 
             if (!otherUserMarkers.has(id)) {
                 let marker = new maplibregl.Marker({color: 'red'})
-                
+
                 getUserNameById(location.userId).then((name) => {
                     if (name) {
-                        marker.setPopup(new maplibregl.Popup().setHTML('<h1>' + name + '</h1>'))
-                            .setLngLat([location.lng, location.lat])
-                            .addTo(map);
+                        getUserInformationId(location.userId).then((userInformationID) => {
+                            fetchUserInfoForOther(userInformationID).then((userInformation) => {
+                               let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
+
+                                marker.setPopup(new maplibregl.Popup().setHTML('<img src="' + image + '" width="50" height="50">' + '<h1>' + name + '</h1>'))
+                                    .setLngLat([location.lng, location.lat])
+                                    .addTo(map);
+                            })
+                        })
                     }
                 })
 
