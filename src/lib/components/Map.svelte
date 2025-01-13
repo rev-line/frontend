@@ -32,15 +32,20 @@
             zoom: 15,
         });
         map.on('load', () => {
-            //do not follow user, if looking at event
-            followUser = false;
             const urlParams = new URLSearchParams(window.location.search);
             const defaultLat = urlParams.get('defaultLat') ?? null;
             const defaultLng = urlParams.get('defaultLng') ?? null;
 
             if (defaultLng && defaultLat) {
+                //stop following user, if looking at event
+                followUser = false;
                 map.setCenter([defaultLng, defaultLat]);
             }
+        });
+
+        map.on('dragstart', () => {
+            //stop following user on map dragging
+            followUser = false;
         });
 
         socket = io('https://revline-express.programar.io/');
@@ -161,6 +166,17 @@
         otherUserMarkers.forEach((marker) => marker.remove());
     });
 
+    function setUserLocation() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const {latitude, longitude, speed} = position.coords;
+            if (map) {
+                map.setCenter([longitude, latitude]);
+            }
+            if (!followUser) {
+                followUser = true;
+            }
+        });
+    }
     function updateMarkers(locations: any) {
         const existingIds = new Set();
 
@@ -211,13 +227,11 @@
 </script>
 
 {#if showMap}
-    {#if !followUser}
-        <Button class="fixed z-50 rounded-lg" style="bottom:10%; right: 24px; width: 64px; height: 64px" onclick={() => followUser = true}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="2 2 12 12">
-                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
-            </svg>
-        </Button>
-    {/if}
+    <Button class="fixed z-50 rounded-lg" style="bottom:10%; right: 24px; width: 64px; height: 64px" onclick={setUserLocation}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="2 2 12 12">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+        </svg>
+    </Button>
     <Speedometer calculatedSpeed={calculatedSpeed}/>
     <div id="map" style="width: 100%; height: 100vh;"></div>
 {:else}
