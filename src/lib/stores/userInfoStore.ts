@@ -4,6 +4,8 @@ import { authStore } from "$lib/stores/authStore";
 import type IUserInfo from '$lib/models/IUserInfo';
 import type IVehicle from '$lib/models/IVehicle';
 import type IEvent from '$lib/models/IEvent';
+import { get } from 'svelte/store';
+import {fetchEventDetails} from "$lib/stores/eventDetailStore";
 
 // Stores for user info and related data
 export const userInfoStore = writable<IUserInfo | null>(null);
@@ -151,7 +153,43 @@ export async function createUserInfo() {
     }
 }
 
-// Subscribe to authStore for automatic user info fetching
+export async function addEventToUser(eventId: string): Promise<void> {
+    try {
+        // Get the current authenticated user
+        const authState = get(authStore);
+
+        if (!authState.isAuthenticated || !authState.user) {
+            throw new Error('User is not logged in.');
+        }
+
+        // Fetch the user's info
+        const userInfoId = authState.user.user_informations;
+        const userInfo = await pb.collection('user_info').getOne<IUserInfo>(userInfoId);
+
+        // Check if the event is already in the upcoming events
+        const upcomingEvents = userInfo.upcoming_events || [];
+        if (upcomingEvents.includes(eventId)) {
+            console.log('Event is already in the upcoming events.');
+            return;
+        }
+
+        // Add the event ID to the user's upcoming events
+        const updatedUpcomingEvents = [...upcomingEvents, eventId];
+        await pb.collection('user_info').update(userInfoId, { upcoming_events: updatedUpcomingEvents });
+
+        // Fetch the event details
+        const eventDetails = await pb.collection('event').getOne<IEvent>(eventId);
+
+        // Update the userUpcomingEventsStore
+        userUpcomingEventsStore.update((events) => [...events, eventDetails]);
+
+        console.log(`Event ${eventId} added to the user's upcoming events.`);
+    } catch (error) {
+        console.error('Error adding event to user:', error);
+    }
+}
+
+
 authStore.subscribe((authState) => {
     if (authState.isAuthenticated && authState.user) {
         fetchUserInfo(authState.user.user_informations).then();

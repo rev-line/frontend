@@ -2,6 +2,7 @@
     import { eventMinimalStore, fetchMinimalEvents } from "$lib/stores/eventMinimalStore";
     import {onMount} from "svelte";
     import * as Card from "$lib/components/ui/card";
+    import {Button} from "$lib/components/ui/button";
 
     onMount(() => {
         fetchMinimalEvents();
@@ -19,6 +20,7 @@
             timeZone: 'UTC', // Setzt sicher, dass keine automatische Zeitzonenanpassung erfolgt
         }).format(date);
     }
+
 </script>
 
 <div class="container flex flex-col justify-center items-center nav-spacer">

@@ -2,6 +2,7 @@
     import { createEvent } from '$lib/stores/eventDetailStore';
     import type IEvent from '$lib/models/IEvent';
     import {goto} from "$app/navigation";
+    import {Button} from "$lib/components/ui/button";
 
     // Define the form data with default values
     let eventData: Partial<IEvent> = {
@@ -29,7 +30,6 @@
         }
     }
 </script>
-
 
 <div class="container mx-auto max-w-lg p-6 bg-white shadow-md rounded-md nav-spacer">
     <h1 class="text-3xl font-bold text-center mb-6">Create Event</h1>

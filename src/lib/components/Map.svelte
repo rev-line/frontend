@@ -4,7 +4,7 @@
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
     import {authStore, getUserById} from '$lib/stores/authStore';
-    import {fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
+    import {addEventToUser, fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
     import {Speedometer} from "$lib/components/ui/speedometer";
@@ -24,6 +24,11 @@
     // we're running into an issue, where the map requires user input before it can be interacted with/ loaded
     // also, sometimes we receive the error "failed to fetch" from the cdn - might be related to the same issue
     let debugLine = "[" + Date.now() + "] Map.svelte: defaultLat: " + defaultLat + ", defaultLng: " + defaultLng + ", tileSheet: " + tileSheet;
+
+
+    async function registerForEvent(eventId: string): Promise<void> {
+       await addEventToUser(eventId);
+    }
 
     const initRevlineMap = () => {
         map = new maplibregl.Map({
@@ -122,7 +127,10 @@
         fetchMinimalEvents().then(() => {
             $eventMinimalStore.map((event) => {
                 let eventMarker = new maplibregl.Marker()
-                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1><br><button class="btn btn-primary" onclick="navigateToEvent(' + [event!.start_longitude!, event!.start_latitude!] + ')">Navigate to event</button>'))
+                    .setPopup(new maplibregl.Popup().setHTML(
+                        '<h1>' + event.name + '</h1>' +
+                        '<br><button class="btn btn-primary" onclick="navigateToEvent(' + [event!.start_longitude!, event!.start_latitude!] + ')">Navigate to event</button>' +
+                        '<button class="btn btn-success mt-2" onclick="console.log(' + event!.id! + ')">Register for event</button>'))
                     .setLngLat([event!.start_longitude!, event!.start_latitude!]);
                 eventMarker.addClassName('event-marker');
                 eventMarker.addTo(map);
