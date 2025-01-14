@@ -72,10 +72,10 @@
                     </div>
                 </form>
                 {#if !accept_dsgvo || !accept_agb}
-                    <label for="disabled_submit" class="text-center text-gray-500 text-xs">Please accept our AGBs and DSGVO conditions to continue</label>
+                    <label for="disabled_submit" class="text-center text-gray-500 text-xs">Please accept our Terms and DSGVO conditions to continue</label>
                 {/if}
                 <br>
-                <label for="agb">I accept the <a target="_blank" href="https://cdn.programar.io/lAGa5/bODaPOSa61.pdf/raw" class="underline">AGBs</a></label>
+                <label for="agb">I accept the <a target="_blank" href="https://cdn.programar.io/lAGa5/bODaPOSa61.pdf/raw" class="underline">Terms and Conditions</a></label>
                 <input id="agb" type="checkbox" bind:checked={accept_agb}>
                 <br>
                 <label for="dsgvo">I accept the <a target="_blank" href="https://cdn.programar.io/lAGa5/YOkoLinu84.pdf/raw" class="underline">DSGVO conditions</a></label>
