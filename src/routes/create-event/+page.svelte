@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEvent } from '$lib/stores/eventDetailStore';
     import type IEvent from '$lib/models/IEvent';
+    import {goto} from "$app/navigation";
 
     // Define the form data with default values
     let eventData: Partial<IEvent> = {
@@ -22,7 +23,7 @@
         event.preventDefault();
         try {
             await createEvent(eventData); // Call the event creation function
-            console.log('Event created successfully:', eventData);
+            await goto('/events')
         } catch (error) {
             console.error('Error creating event:', error);
         }
@@ -116,18 +117,20 @@
                     id="start_date"
                     name="start_date"
                     bind:value={eventData.start_date}
+                    required
                     class="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
         </div>
 
         <!-- Duration -->
         <div class="flex flex-col">
-            <label for="duration" class="font-medium mb-1">Duration</label>
+            <label for="duration" class="font-medium mb-1">End Date</label>
             <input
-                    type="time"
+                    type="datetime-local"
                     id="duration"
                     name="duration"
                     bind:value={eventData.duration}
+                    required
                     class="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
         </div>

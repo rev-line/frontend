@@ -12,9 +12,9 @@
     <h1 class="text-3xl mb-4"> Events </h1>
 
     {#if $eventMinimalStore.length > 0}
-        <div class="d-flex flex-column gap-4 align-items-center w-100">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
             {#each $eventMinimalStore as event}
-                <a href={'/?event=' + btoa(event.id) + (event.start_latitude ? ('&defaultLat=' + event.start_latitude) : '') + (event.start_longitude ? ('&defaultLng=' + event.start_longitude) : '')} class="max-w-96 w-inherit">
+                <a href={'/?event=' + btoa(event.id) + (event.start_latitude ? ('&defaultLat=' + event.start_latitude) : '') + (event.start_longitude ? ('&defaultLng=' + event.start_longitude) : '')} class="max-w-96 w-full">
                     <Card.Root>
                         <Card.Header>
                             <Card.Title>{event.name}</Card.Title>
@@ -27,7 +27,6 @@
                             </Card.Description>
                         </Card.Header>
                         <Card.Content>
-
                             <p>ID: {event.id}</p>
                             <p>Max people: {event.max_people}</p>
                         </Card.Content>
