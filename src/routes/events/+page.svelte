@@ -6,6 +6,19 @@
     onMount(() => {
         fetchMinimalEvents();
     })
+
+    function formatDate(dateString: string): string {
+        const date = new Date(dateString);
+
+        // 1 Stunde abziehen
+        date.setHours(date.getHours());
+
+        return new Intl.DateTimeFormat('de-DE', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+            timeZone: 'UTC', // Setzt sicher, dass keine automatische Zeitzonenanpassung erfolgt
+        }).format(date);
+    }
 </script>
 
 <div class="container flex flex-col justify-center items-center nav-spacer">
@@ -27,7 +40,12 @@
                             </Card.Description>
                         </Card.Header>
                         <Card.Content>
-                            <p>ID: {event.id}</p>
+                            {#if event.start_date}
+                                <p>Start Date: {formatDate(event.start_date)}</p>
+                            {/if}
+                            {#if event.duration}
+                                <p>End Date: {formatDate(event.duration)}</p>
+                            {/if}
                             <p>Max people: {event.max_people}</p>
                         </Card.Content>
                     </Card.Root>
