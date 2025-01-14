@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store';
-import { pb } from '../pocketbase/pocketbase.js';
+import {writable} from 'svelte/store';
+import {pb} from '../pocketbase/pocketbase.js';
 import type AuthState from "$lib/models/IAuthState";
 
 export const authStore = writable<AuthState>({
@@ -92,19 +92,9 @@ export const linkUserInformation = async (userId: string, userInformationId: str
 	}
 }
 
-export const getUserInformationId = async (userId: string) => {
+export const getUserById = async (userId: string) => {
 	try {
-		const user = await pb.collection('users').getOne(userId);
-		return user.user_informations;
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-export const getUserNameById = async (userId: string) => {
-	try {
-		const user = await pb.collection('users').getOne(userId);
-		return user.username;
+		return await pb.collection('users').getOne(userId);
 	} catch (error) {
 		console.log(error);
 	}

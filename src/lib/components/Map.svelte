@@ -3,7 +3,7 @@
     import maplibregl from 'maplibre-gl';
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
-    import {authStore, getUserInformationId, getUserNameById} from '$lib/stores/authStore';
+    import {authStore, getUserById} from '$lib/stores/authStore';
     import {fetchUserInfoForOther, userInfoStore} from '$lib/stores/userInfoStore';
     import BlockScreen from "$lib/components/block-screens/BlockScreen.svelte";
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
@@ -19,6 +19,7 @@
     let showMap = $state(true);
     let calculatedSpeed =  $state(0);
     let followUser = $state(true);
+    let events: any = $state([]);
 
     // we're running into an issue, where the map requires user input before it can be interacted with/ loaded
     // also, sometimes we receive the error "failed to fetch" from the cdn - might be related to the same issue
@@ -30,6 +31,10 @@
             style: tileSheet,
             center: [defaultLng, defaultLat],
             zoom: 15,
+           // maxZoom: 20,
+           // minZoom: 12,
+
+
         });
         map.on('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -56,7 +61,6 @@
         }
 
         debugLine += " - socket: " + socket;
-
         if (navigator.geolocation) {
 
             debugLine += " - navigator.geolocation is available";
@@ -98,7 +102,7 @@
 
                     debugLine += " - userMarker: true";
 
-                    if (followUser) {
+                   if (followUser) {
                         map.setCenter([longitude, latitude]);
                     }
                 },
@@ -118,10 +122,11 @@
         fetchMinimalEvents().then(() => {
             $eventMinimalStore.map((event) => {
                 let eventMarker = new maplibregl.Marker()
-                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1>'))
+                    .setPopup(new maplibregl.Popup().setHTML('<h1>' + event.name + '</h1><br><button class="btn btn-primary" onclick="navigateToEvent(' + [event!.start_longitude!, event!.start_latitude!] + ')">Navigate to event</button>'))
                     .setLngLat([event!.start_longitude!, event!.start_latitude!]);
                 eventMarker.addClassName('event-marker');
                 eventMarker.addTo(map);
+                events.push({id: event, lng: event!.start_longitude!, lat: event!.start_latitude!});
             });
         });
 
@@ -132,7 +137,7 @@
     }
 
 
-    onMount(() => {
+    onMount(async () => {
         if (!$authStore.isAuthenticated) {
             errorMessage = 'Please log in to use this feature.';
             showMap = false;
@@ -140,15 +145,26 @@
         }
 
         initRevlineMap();
-        if (window) {
-            // get query params
-            const urlParams = new URLSearchParams(window.location.search);
-            const eventId = urlParams.get('event');
-            if (eventId) {
-                console.log('Event ID: ', atob(eventId));
+    });
+
+    $effect(() => {
+        if (window && events.length > 0) {
+            console.log('Events:', events);
+            if (window) {
+                // get query params
+                const urlParams = new URLSearchParams(window.location.search);
+                const eventId = urlParams.get('event');
+                if (eventId) {
+                    const event = events.find((event: any) => event[0].id === atob(eventId));
+                    if (event) {
+                        console.log('Event:', event);
+                        map.setCenter([event.lng, event.lat]);
+                    }
+
+                    console.log('Event:', null);
+                }
             }
         }
-        console.log(debugLine);
     });
 
     onDestroy(() => {
@@ -181,35 +197,74 @@
         const existingIds = new Set();
 
         locations.forEach((location: any) => {
-            const id = `${location.lat}-${location.lng}`;
+            const id = `${location.lat}-${location.lng}-${location.userId}`;
 
             existingIds.add(id);
 
             if (!otherUserMarkers.has(id)) {
                 let marker = new maplibregl.Marker({color: 'red'})
 
-                getUserNameById(location.userId).then((name) => {
-                    if (name) {
+                getUserById(location.userId).then((user) => {
+                        if(!user) return;
+
+                        fetchUserInfoForOther(user.user_informations).then((userInformation) => {
+                            let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
+
+                            marker.setPopup(new maplibregl.Popup().setHTML('<img src="' + image + '" width="50" height="50">' + '<h1>' + user.username + '</h1>'))
+                                .setLngLat([location.lng, location.lat])
+                                .addTo(map).addClassName('user-marker');
+
+                            if (userInformation?.mapIconChoice === 'Motorcycle') {
+                                marker.removeClassName("user-marker");
+                                marker.addClassName('user-marker-motorcycle');
+                            }
+
+                        }).catch((err) => {
+                            console.error('Error getting user name:', err);
+                            let name = "Unknown User";
+                            marker.setPopup(new maplibregl.Popup().setHTML('<h1>' + name + '</h1>'))
+                                .setLngLat([location.lng, location.lat])
+                                .addTo(map);
+                            marker.addClassName('user-marker');
+                        });
+                    }).catch((err) => {
+                        console.error('Error getting user name:', err);
+                        let name = "Unknown User";
+                        marker.setPopup(new maplibregl.Popup().setHTML('<h1>' + name + '</h1>'))
+                            .setLngLat([location.lng, location.lat])
+                            .addTo(map);
+                        marker.addClassName('user-marker');
+                    });
+
+
+
+
+                /* if (userInformation?.mapIconChoice === 'Motorcycle') {
+                     marker.removeClassName("user-marker");
+                     marker.addClassName('user-marker-motorcycle');
+                 }*/
+
+               /* getUserNameById(location.userId).then((name) => {
+
+                        if(!name) name = "Unknown User";
+
                         getUserInformationId(location.userId).then((userInformationID) => {
                             fetchUserInfoForOther(userInformationID).then((userInformation) => {
-                               let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
+                                let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
 
                                 marker.setPopup(new maplibregl.Popup().setHTML('<img src="' + image + '" width="50" height="50">' + '<h1>' + name + '</h1>'))
                                     .setLngLat([location.lng, location.lat])
                                     .addTo(map);
+
+                                if (userInformation?.mapIconChoice === 'Motorcycle') {
+                                    marker.removeClassName("user-marker");
+                                    marker.addClassName('user-marker-motorcycle');
+                                }
+
                             })
                         })
-                    }
-                })
 
-                marker.addClassName("user-marker");
-
-                //fetchUserInfoForOther(location.userId).then((userInfo) => {
-                    //if (userInfo?.mapIconChoice === 'Motorcycle') {
-                    //    marker.removeClassName("user-marker");
-                    //    marker.addClassName('user-marker-motorcycle');
-                    //}
-                //});
+                })*/
 
                 otherUserMarkers.set(id, marker);
             } else {
