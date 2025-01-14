@@ -18,5 +18,5 @@
 <Map
 		defaultLat={$authStore.isAuthenticated ? ($authStore.user?.lastLat ?? defaultLat) : defaultLat}
 		defaultLng={$authStore.isAuthenticated ? ($authStore.user?.lastLng ?? defaultLng) : defaultLng}
-		tileSheet="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+		tileSheet="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 />

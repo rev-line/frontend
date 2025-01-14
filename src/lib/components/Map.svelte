@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onDestroy, onMount} from 'svelte';
-    import maplibregl from 'maplibre-gl';
+    import maplibregl, {type MapLibreEvent} from 'maplibre-gl';
     import {io} from 'socket.io-client';
     import {toast} from "@zerodevx/svelte-toast";
     import {authStore, getUserById} from '$lib/stores/authStore';
@@ -9,6 +9,7 @@
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
     import {Speedometer} from "$lib/components/ui/speedometer";
     import {Button} from "$lib/components/ui/button";
+    import Supercluster from "supercluster";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
     let map: any;
@@ -20,6 +21,7 @@
     let calculatedSpeed =  $state(0);
     let followUser = $state(true);
     let events: any = $state([]);
+    let zoomLevel: any = $state(15);
 
     // we're running into an issue, where the map requires user input before it can be interacted with/ loaded
     // also, sometimes we receive the error "failed to fetch" from the cdn - might be related to the same issue
@@ -36,9 +38,6 @@
             style: tileSheet,
             center: [defaultLng, defaultLat],
             zoom: 15,
-           // maxZoom: 20,
-           // minZoom: 12,
-
 
         });
         map.on('load', () => {
@@ -46,12 +45,17 @@
             const defaultLat = urlParams.get('defaultLat') ?? null;
             const defaultLng = urlParams.get('defaultLng') ?? null;
 
+           // map.setLayoutProperty('user-marker', 'icon-allow-overlap', true);
+           // map.setLayoutProperty('user-marker-motorcycle', 'icon-allow-overlap', true);
+           // map.setLayoutProperty('event-marker', 'icon-allow-overlap', true);
+
             if (defaultLng && defaultLat) {
-                //stop following user, if looking at event
                 followUser = false;
                 map.setCenter([defaultLng, defaultLat]);
             }
         });
+
+        map.on('')
 
         map.on('dragstart', () => {
             //stop following user on map dragging
@@ -87,6 +91,7 @@
                             .setPopup(popup)
                             .setLngLat([longitude, latitude])
                             .addTo(map);
+                        userMarker.getElement().style.zIndex = 0;
 
                         userInfoStore.subscribe(() => {
                             let isMotorcycle = $userInfoStore?.mapIconChoice === 'Motorcycle';
@@ -142,6 +147,19 @@
             console.log('Updated user locations:', locations);
             updateMarkers(locations);
         });
+
+        map.on('zoomend', () => {
+            let zoomLevel = map.getZoom();
+            if(zoomLevel > 16) {
+                document.querySelectorAll('.maplibregl-marker:not(.event-marker)').forEach((marker) => {
+                    marker.style.display = 'block';
+                });
+            } else {
+                document.querySelectorAll('.maplibregl-marker:not(.event-marker)').forEach((marker) => {
+                    marker.style.display = 'none';
+                });
+            }
+        })
     }
 
 
@@ -201,6 +219,7 @@
             }
         });
     }
+
     function updateMarkers(locations: any) {
         const existingIds = new Set();
 
@@ -247,33 +266,6 @@
 
 
 
-                /* if (userInformation?.mapIconChoice === 'Motorcycle') {
-                     marker.removeClassName("user-marker");
-                     marker.addClassName('user-marker-motorcycle');
-                 }*/
-
-               /* getUserNameById(location.userId).then((name) => {
-
-                        if(!name) name = "Unknown User";
-
-                        getUserInformationId(location.userId).then((userInformationID) => {
-                            fetchUserInfoForOther(userInformationID).then((userInformation) => {
-                                let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
-
-                                marker.setPopup(new maplibregl.Popup().setHTML('<img src="' + image + '" width="50" height="50">' + '<h1>' + name + '</h1>'))
-                                    .setLngLat([location.lng, location.lat])
-                                    .addTo(map);
-
-                                if (userInformation?.mapIconChoice === 'Motorcycle') {
-                                    marker.removeClassName("user-marker");
-                                    marker.addClassName('user-marker-motorcycle');
-                                }
-
-                            })
-                        })
-
-                })*/
-
                 otherUserMarkers.set(id, marker);
             } else {
                 otherUserMarkers.get(id)?.setLngLat([location.lng, location.lat]);
@@ -285,6 +277,83 @@
                 marker.remove();
                 otherUserMarkers.delete(id);
             }
+        });
+
+
+        let points = locations.map((location: any) => {
+            return {
+                type: 'Feature',
+                properties: {
+                    cluster: false,
+                    userId: location.userId
+                },
+                geometry: {
+                    type: 'Point',
+                    coordinates: [location.lng, location.lat]
+                }
+            };
+        });
+
+        const cluster = new Supercluster({ radius: 50, maxZoom: 16, extent: 256 });
+        cluster.load(points);
+
+// Get clusters for a zoom level
+        const clusters = cluster.getClusters([-180, -85, 180, 85], 10); // Adjust zoom level
+        console.log('Clusters:', clusters);
+
+        if(!map.getSource('clusters')) {
+            map.addSource('clusters', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                },
+                cluster: true,
+                clusterRadius: 50,
+                clusterMaxZoom: 16
+            });
+        }
+
+        if(!map.getLayer('clusters')) {
+            // Add cluster circles
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'clusters',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': '#00ffe8',
+                    'circle-radius': 15
+                }
+            }, 'unclustered-points');
+            map.addLayer({
+                id: 'simple-cluster-count\'',
+                type: 'symbol',
+                source: 'clusters',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count}',
+                    'text-size': 12,
+                },
+            }, 'unclustered-points');
+
+            map.addLayer({
+                id: 'unclustered-points',
+                type: 'circle',
+                source: 'clusters',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#11b4da',
+                    'circle-radius': 5
+                }
+            });
+        }
+
+        // Update source data with clusters
+        const clustersData = cluster.getClusters([-180, -85, 180, 85], Math.floor(map.getZoom()));
+        map.getSource('clusters').setData({
+            type: 'FeatureCollection',
+            features: clustersData
         });
     }
 </script>
