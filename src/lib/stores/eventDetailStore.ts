@@ -21,7 +21,7 @@ export async function createEvent(eventData: Partial<IEvent>): Promise<void> {
         await pb.collection('event').create(eventData);
     } catch (error) {
         console.error('Error creating event:', error);
-        throw error; // Re-throw error for handling in the UI
+        throw error;
     }
 }
 

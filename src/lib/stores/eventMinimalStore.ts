@@ -3,7 +3,7 @@ import { pb } from '../pocketbase/pocketbase.js';
 import type IEvent from '$lib/models/IEvent';
 
 // Define the minimal event type
-export type EventMinimal = Pick<IEvent, 'id' | 'name' | 'max_people' | 'rideout' | 'hangout' | 'start_longitude' | 'start_latitude'>;
+export type EventMinimal = Pick<IEvent, 'id' | 'name' | 'max_people' | 'rideout' | 'hangout' | 'start_longitude' | 'start_latitude' | 'start_date' | 'duration'>;
 
 // Store for minimal event information
 export const eventMinimalStore = writable<EventMinimal[]>([]);
@@ -12,10 +12,24 @@ export const eventMinimalStore = writable<EventMinimal[]>([]);
 export async function fetchMinimalEvents(): Promise<void> {
     try {
         const response = await pb.collection('event').getFullList<EventMinimal>({
-            fields: 'id,name,max_people,rideout,hangout,start_longitude,start_latitude', // Fetch only these fields
+            fields: 'id,name,max_people,rideout,hangout,start_longitude,start_latitude,start_date,duration',
         });
-        eventMinimalStore.set(response);
-        console.log(response);
+
+        // Get the current date
+        const now = new Date();
+
+        // Filter events based on the start and end date
+        const validEvents = response.filter(event => {
+            const startDate = event.start_date ? new Date(event.start_date) : null;
+            const endDate = event.duration ? new Date(event.duration) : null;
+
+            return (
+                (!startDate || startDate >= now) ||
+                (!endDate || endDate >= now)
+            );
+        });
+
+        eventMinimalStore.set(validEvents);
     } catch (error) {
         console.error('Error fetching minimal events:', error);
         eventMinimalStore.set([]);
