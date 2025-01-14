@@ -9,6 +9,7 @@
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
     import {Speedometer} from "$lib/components/ui/speedometer";
     import {Button} from "$lib/components/ui/button";
+    import {goto} from "$app/navigation";
     import Supercluster from "supercluster";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
@@ -20,6 +21,7 @@
     let showMap = $state(true);
     let calculatedSpeed =  $state(0);
     let followUser = $state(true);
+    let eventCreation = $state(true);
     let events: any = $state([]);
     let zoomLevel: any = $state(15);
 
@@ -31,6 +33,28 @@
         await addEventToUser(eventId);
     }
 
+    function createEventMarker() {
+        eventCreation = !eventCreation;
+        if (map) {
+            map.on('click', async (e) => {
+                let lat = e.lngLat.lat;
+                let lng = e.lngLat.lng;
+                console.log(lat + ' ' + lng);
+                let popup = new maplibregl.Popup();
+                let link = "/create-event?lat=" + lat + "&lng=" + lng;
+                const eventMarker = new maplibregl.Marker({className: `event-marker`})
+                    .setPopup(popup)
+                    .setLngLat([lng, lat])
+                    .addTo(map);
+                try {
+                    await goto(link);
+
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        }
+    }
     const initRevlineMap = () => {
         map = new maplibregl.Map({
             container: 'map',
@@ -54,7 +78,6 @@
             }
         });
 
-        map.on('')
 
         map.on('dragstart', () => {
             //stop following user on map dragging
@@ -358,6 +381,13 @@
 </script>
 
 {#if showMap}
+    {#if eventCreation}
+        <Button class="fixed z-50 rounded-lg" style="bottom:20%; right: 24px; width: 64px; height: 64px" onclick={createEventMarker}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-plus" viewBox="4 4 8 8">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+            </svg>
+        </Button>
+    {/if}
     <Button class="fixed z-50 rounded-lg" style="bottom:10%; right: 24px; width: 64px; height: 64px" onclick={setUserLocation}>
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="2 2 12 12">
             <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
