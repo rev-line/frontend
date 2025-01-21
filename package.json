@@ -38,6 +38,7 @@
 	"dependencies": {
 		"@maplibre/maplibre-gl-directions": "^0.7.2",
 		"@zerodevx/svelte-toast": "^0.9.6",
+		"chart.js": "^4.4.7",
 		"maplibre-gl": "^4.7.1",
 		"pocketbase": "^0.21.5",
 		"socket.io-client": "^4.8.1",

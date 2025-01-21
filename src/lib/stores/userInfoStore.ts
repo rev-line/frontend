@@ -13,6 +13,53 @@ export const userVehiclesStore = writable<IVehicle[]>([]);
 export const userUpcomingEventsStore = writable<IEvent[]>([]);
 export const userPastEventsStore = writable<IEvent[]>([]);
 
+export async function fetchUserCountByMonth() {
+    try {
+        const users = await pb.collection('user_info').getFullList<IUserInfo>({
+            fields: 'id,first_name,last_name,created',
+        });
+
+        // Map the months to the accoring index in the array (november = 11, december = 12, january = 1...)
+        // and count the users for each month
+
+        let dates = [];
+
+        users.forEach((user) => {
+            const created = new Date(user.created);
+            const month = created.getMonth() ;
+            dates[month] = dates[month] ? dates[month] + 1 : 1;
+        })
+
+        return dates;
+
+    } catch (error) {
+        console.error('Error fetching users mapped by month:', error);
+        return {};
+    }
+}
+
+export async function fetchEventCreationCount() {
+    try {
+        const events = await pb.collection('event').getFullList<IEvent>({
+            fields: 'id,name,created',
+        });
+
+        let dates = [];
+
+        events.forEach((event) => {
+            const created = new Date(event.created);
+            const month = created.getMonth();
+            dates[month] = dates[month] ? dates[month] + 1 : 1;
+        })
+
+        return dates;
+
+    } catch (error) {
+        console.error('Error fetching events mapped by month:', error);
+        return {};
+    }
+}
+
 export async function fetchUserInfo(userId: string) {
     try {
         const userInfo = await pb.collection('user_info').getOne(userId);
