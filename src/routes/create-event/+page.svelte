@@ -36,6 +36,15 @@
     // Handle form submission
     async function handleSubmit(event: Event) {
         event.preventDefault();
+        //format start date and duration to conform to db expectation
+        if (eventData.start_date) {
+            eventData.start_date = eventData.start_date.replace("T", " ");
+            eventData.start_date += ":00.000Z";
+        }
+        if (eventData.duration) {
+            eventData.duration = eventData.duration.replace("T", " ");
+            eventData.duration += ":00.000Z";
+        }
         try {
             await createEvent(eventData); // Call the event creation function
             await goto('/events')
