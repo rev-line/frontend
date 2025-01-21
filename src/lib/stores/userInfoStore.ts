@@ -194,7 +194,6 @@ export async function createUserInfo() {
     try {
         const userInfo = await pb.collection('user_info').create({});
         userInfoStore.set(userInfo);
-        console.log(userInfo);
     } catch (error) {
         console.error('Error creating user_info:', error);
     }
@@ -216,7 +215,6 @@ export async function addEventToUser(eventId: string): Promise<void> {
         // Check if the event is already in the upcoming events
         const upcomingEvents = userInfo.upcoming_events || [];
         if (upcomingEvents.includes(eventId)) {
-            console.log('Event is already in the upcoming events.');
             return;
         }
 
@@ -229,8 +227,6 @@ export async function addEventToUser(eventId: string): Promise<void> {
 
         // Update the userUpcomingEventsStore
         userUpcomingEventsStore.update((events) => [...events, eventDetails]);
-
-        console.log(`Event ${eventId} added to the user's upcoming events.`);
     } catch (error) {
         console.error('Error adding event to user:', error);
     }

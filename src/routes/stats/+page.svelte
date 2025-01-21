@@ -8,8 +8,6 @@
     onMount(async () => {
         const userCount = await fetchUserCountByMonth();
 
-        console.log(userCount);
-
         new Chart( document.getElementById("user-chart") as unknown as ChartItem , {
             type: "bar",
             data: {

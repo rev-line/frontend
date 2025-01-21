@@ -42,7 +42,6 @@
             map.on('click', async (e) => {
                 let lat = e.lngLat.lat;
                 let lng = e.lngLat.lng;
-                console.log(lat + ' ' + lng);
                 let popup = new maplibregl.Popup();
                 let link = "/create-event?lat=" + lat + "&lng=" + lng;
                 const eventMarker = new maplibregl.Marker({className: `event-marker`})
@@ -126,8 +125,6 @@
                         userInfoStore.subscribe(() => {
                             let isMotorcycle = $userInfoStore?.mapIconChoice === 'Motorcycle';
 
-                            console.log($userInfoStore, $userInfoStore?.mapIconChoice, isMotorcycle);
-
                             // Set css class to show the according svg
                             if (isMotorcycle) {
                                 userMarker.removeClassName('self-user-marker');
@@ -177,7 +174,6 @@
 
         // Listen for other user's location changes
         socket.on('userLocations', (locations: any) => {
-            console.log('Updated user locations:', locations);
             updateMarkers(locations);
         });
 
@@ -209,7 +205,6 @@
 
     $effect(() => {
         if (window && events.length > 0) {
-            console.log('Events:', events);
             if (window) {
                 // get query params
                 const urlParams = new URLSearchParams(window.location.search);
@@ -218,11 +213,8 @@
                     // Move map to event when navigated to event by url
                     const event = events.find((event: any) => event[0].id === atob(eventId));
                     if (event) {
-                        console.log('Event:', event);
                         map.setCenter([event.lng, event.lat]);
                     }
-
-                    console.log('Event:', null);
                 }
             }
         }
@@ -343,7 +335,6 @@
 
         // Get clusters for a zoom level
         const clusters = cluster.getClusters([-180, -85, 180, 85], 10); // Adjust zoom level
-        console.log('Clusters:', clusters);
 
         if(!map.getSource('clusters')) {
             map.addSource('clusters', {

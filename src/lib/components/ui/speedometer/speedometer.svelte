@@ -37,8 +37,6 @@
         const angleRange = 270;
         const startAngle = 225;
         const angle = startAngle - (newSpeed / 200) * angleRange;
-
-        console.log(`Speed: ${newSpeed}, Angle: ${angle}`);
         speed.set(newSpeed);
         needle!.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
         valueElement.textContent = newSpeed.toFixed(0);
