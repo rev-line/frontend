@@ -14,7 +14,7 @@ function initAuth() {
 	authStore.set({ isAuthenticated, user });
 
 	pb.authStore.onChange(() => {
-		"Store changed");
+		console.log("Store changed");
 		authStore.set({
 			isAuthenticated: pb.authStore.isValid,
 			user: pb.authStore.model,
