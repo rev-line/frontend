@@ -13,4 +13,5 @@ export default interface UserInfo {
     past_events?: string[]; // Array of event references
     collectionId: string;
     mapIconChoice: "Car" | "Motorcycle";
+    created?: string;
 }

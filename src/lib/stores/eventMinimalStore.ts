@@ -37,7 +37,6 @@ export async function fetchMinimalEvents(): Promise<void> {
 }
 
 export async function getRegisteredUserCount(eventId: string): Promise<number> {
-    console.log("start " + eventId);
     try {
         // Filter users where the event is in the upcoming_events relation
         const users = await pb.collection('user_info').getFullList({
@@ -49,5 +48,4 @@ export async function getRegisteredUserCount(eventId: string): Promise<number> {
         console.error('Error fetching registered users:', error);
         return 0;
     }
-    console.log("end " + eventId);
 }

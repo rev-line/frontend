@@ -11,11 +11,13 @@
     import {Button} from "$lib/components/ui/button";
     import {goto} from "$app/navigation";
     import Supercluster from "supercluster";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
     let map: any;
     let userMarker: any;
     let otherUserMarkers = new Map<string, maplibregl.Marker>();
+    let otherUserList = new Map<string, object>();
     let socket: any;
     let errorMessage = $state('');
     let showMap = $state(true);
@@ -40,7 +42,6 @@
             map.on('click', async (e) => {
                 let lat = e.lngLat.lat;
                 let lng = e.lngLat.lng;
-                console.log(lat + ' ' + lng);
                 let popup = new maplibregl.Popup();
                 let link = "/create-event?lat=" + lat + "&lng=" + lng;
                 const eventMarker = new maplibregl.Marker({className: `event-marker`})
@@ -124,8 +125,6 @@
                         userInfoStore.subscribe(() => {
                             let isMotorcycle = $userInfoStore?.mapIconChoice === 'Motorcycle';
 
-                            console.log($userInfoStore, $userInfoStore?.mapIconChoice, isMotorcycle);
-
                             // Set css class to show the according svg
                             if (isMotorcycle) {
                                 userMarker.removeClassName('self-user-marker');
@@ -174,7 +173,6 @@
 
         // Listen for other user's location changes
         socket.on('userLocations', (locations: any) => {
-            console.log('Updated user locations:', locations);
             updateMarkers(locations);
         });
 
@@ -206,7 +204,6 @@
 
     $effect(() => {
         if (window && events.length > 0) {
-            console.log('Events:', events);
             if (window) {
                 // get query params
                 const urlParams = new URLSearchParams(window.location.search);
@@ -215,11 +212,8 @@
                     // Move map to event when navigated to event by url
                     const event = events.find((event: any) => event[0].id === atob(eventId));
                     if (event) {
-                        console.log('Event:', event);
                         map.setCenter([event.lng, event.lat]);
                     }
-
-                    console.log('Event:', null);
                 }
             }
         }
@@ -281,6 +275,11 @@
                                 marker.addClassName('user-marker-motorcycle');
                             }
 
+                            //add username and location of other users to map for display
+                            if (user.id != $authStore.user?.id) {
+                                otherUserList.set(user.username, {lng: location.lng, lat: location.lat});
+                            }
+
                         }).catch((err) => {
                             console.error('Error getting user name:', err);
                             let name = "Unknown User";
@@ -335,7 +334,6 @@
 
         // Get clusters for a zoom level
         const clusters = cluster.getClusters([-180, -85, 180, 85], 10); // Adjust zoom level
-        console.log('Clusters:', clusters);
 
         if(!map.getSource('clusters')) {
             map.addSource('clusters', {
@@ -392,9 +390,31 @@
             features: clustersData
         });
     }
+    function showOtherUser(lng, lat) {
+        if (map) {
+            map.setCenter([lng, lat]);
+            followUser = false;
+        }
+    }
 </script>
 
 {#if showMap}
+    <DropdownMenu.Root >
+        <DropdownMenu.Trigger asChild let:builder>
+            <Button class="fixed z-50 rounded-lg" style="top: 16px; left: 16px" builders={[builder]}>
+                <p class="font-bold">
+                    Show Users
+                </p>
+            </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content class="bg-white">
+            <DropdownMenu.Group>
+                {#each [...otherUserList] as [user, coords]}
+                    <DropdownMenu.Item onclick={() => showOtherUser(coords.lng, coords.lat)}>{user}</DropdownMenu.Item>
+                {/each}
+            </DropdownMenu.Group>
+        </DropdownMenu.Content>
+    </DropdownMenu.Root>
     {#if eventCreation}
         <Button class="fixed z-50 rounded-lg" style="bottom:20%; right: 24px; width: 64px; height: 64px" onclick={createEventMarker}>
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-plus" viewBox="4 4 8 8">

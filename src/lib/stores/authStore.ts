@@ -14,7 +14,7 @@ function initAuth() {
 	authStore.set({ isAuthenticated, user });
 
 	pb.authStore.onChange(() => {
-		console.log("Store changed");
+		"Store changed");
 		authStore.set({
 			isAuthenticated: pb.authStore.isValid,
 			user: pb.authStore.model,
@@ -29,7 +29,6 @@ export const login = async (email: string, password: string): Promise<void> => {
 			isAuthenticated: pb.authStore.isValid,
 			user: pb.authStore.model,
 		});
-		console.log(pb.authStore.model);
 	} catch (error) {
 		throw error;
 	}
@@ -52,7 +51,6 @@ export const createUser = async (email: string, password: string): Promise<void>
 		};
 
 		const newUser = await pb.collection('users').create(userData);
-		console.log('User created:', newUser);
 
 		await login(email, password);
 	} catch (error) {
@@ -79,7 +77,6 @@ export async function updateUsername(userId: string, newUsername: string) {
 
 export const linkUserInformation = async (userId: string, userInformationId: string) => {
 	if(pb.authStore.model?.id === null || pb.authStore.model?.id !== userId){
-		console.log("You are not loggedin");
 		return;
 	}
 

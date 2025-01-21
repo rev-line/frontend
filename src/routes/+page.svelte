@@ -3,7 +3,6 @@
 	import Map from "$lib/components/Map.svelte";
 	import {onMount} from "svelte";
 	import {goto} from "$app/navigation";
-	import {toast} from "@zerodevx/svelte-toast";
 
 	const defaultLat = 14.28611;
 	const defaultLng = 48.30639;
