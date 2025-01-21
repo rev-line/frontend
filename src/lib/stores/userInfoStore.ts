@@ -164,10 +164,15 @@ export async function addEventToUser(eventId: string): Promise<void> {
 
         // Fetch the user's info
         const userInfoId = authState.user.user_informations;
+
+
         const userInfo = await pb.collection('user_info').getOne<IUserInfo>(userInfoId);
+        console.log(userInfo);
 
         // Check if the event is already in the upcoming events
         const upcomingEvents = userInfo.upcoming_events || [];
+
+        console.log(upcomingEvents)
         if (upcomingEvents.includes(eventId)) {
             console.log('Event is already in the upcoming events.');
             return;
@@ -180,8 +185,10 @@ export async function addEventToUser(eventId: string): Promise<void> {
         // Fetch the event details
         const eventDetails = await pb.collection('event').getOne<IEvent>(eventId);
 
+        console.log(eventDetails);
+
         // Update the userUpcomingEventsStore
-        userUpcomingEventsStore.update((events) => [...events, eventDetails]);
+        // userUpcomingEventsStore.update((events) => [...events, eventDetails]);
 
         console.log(`Event ${eventId} added to the user's upcoming events.`);
     } catch (error) {

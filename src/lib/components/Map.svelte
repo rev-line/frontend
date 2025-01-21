@@ -164,8 +164,7 @@
                 let eventMarker = new maplibregl.Marker()
                     .setPopup(new maplibregl.Popup().setHTML(
                         '<h1>' + event.name + '</h1>' +
-                        '<br><button class="btn btn-primary" onclick="navigateToEvent(' + [event!.start_longitude!, event!.start_latitude!] + ')">Navigate to event</button>' +
-                        `<button class="btn btn-success mt-2" onclick="registerForEvent('` + [event!.id!] + `')">Register for event</button>`))
+                        '<br><button class="btn btn-primary" onclick="navigateToEvent(' + [event!.start_longitude!, event!.start_latitude!] + ')">Navigate to event</button>'))
                     .setLngLat([event!.start_longitude!, event!.start_latitude!]);
                 eventMarker.addClassName('event-marker');
                 eventMarker.addTo(map);
