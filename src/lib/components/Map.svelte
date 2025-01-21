@@ -11,11 +11,13 @@
     import {Button} from "$lib/components/ui/button";
     import {goto} from "$app/navigation";
     import Supercluster from "supercluster";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
     let map: any;
     let userMarker: any;
     let otherUserMarkers = new Map<string, maplibregl.Marker>();
+    let otherUserList = new Map<string, object>();
     let socket: any;
     let errorMessage = $state('');
     let showMap = $state(true);
@@ -282,6 +284,11 @@
                                 marker.addClassName('user-marker-motorcycle');
                             }
 
+                            //add username and location of other users to map for display
+                            if (user.id != $authStore.user?.id) {
+                                otherUserList.set(user.username, {lng: location.lng, lat: location.lat});
+                            }
+
                         }).catch((err) => {
                             console.error('Error getting user name:', err);
                             let name = "Unknown User";
@@ -393,9 +400,31 @@
             features: clustersData
         });
     }
+    function showOtherUser(lng, lat) {
+        if (map) {
+            map.setCenter([lng, lat]);
+            followUser = false;
+        }
+    }
 </script>
 
 {#if showMap}
+    <DropdownMenu.Root >
+        <DropdownMenu.Trigger asChild let:builder>
+            <Button class="fixed z-50 rounded-lg" style="top: 16px; left: 16px" builders={[builder]}>
+                <p class="font-bold">
+                    Show Users
+                </p>
+            </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content class="bg-white">
+            <DropdownMenu.Group>
+                {#each [...otherUserList] as [user, coords]}
+                    <DropdownMenu.Item onclick={() => showOtherUser(coords.lng, coords.lat)}>{user}</DropdownMenu.Item>
+                {/each}
+            </DropdownMenu.Group>
+        </DropdownMenu.Content>
+    </DropdownMenu.Root>
     {#if eventCreation}
         <Button class="fixed z-50 rounded-lg" style="bottom:20%; right: 24px; width: 64px; height: 64px" onclick={createEventMarker}>
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-plus" viewBox="4 4 8 8">
