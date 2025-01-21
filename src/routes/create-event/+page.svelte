@@ -3,6 +3,7 @@
     import type IEvent from '$lib/models/IEvent';
     import {goto} from "$app/navigation";
     import {Button} from "$lib/components/ui/button";
+    import {onMount} from "svelte";
 
     // Define the form data with default values
     let eventData: Partial<IEvent> = {
@@ -19,6 +20,19 @@
         start_latitude: ''
     };
 
+    onMount(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = urlParams.get('lat') ?? null;
+        const lng = urlParams.get('lng') ?? null;
+        if (lat && lng) {
+            try {
+                eventData.start_latitude = parseFloat(lat);
+                eventData.start_longitude = parseFloat(lng);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    });
     // Handle form submission
     async function handleSubmit(event: Event) {
         event.preventDefault();

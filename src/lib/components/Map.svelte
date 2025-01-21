@@ -9,6 +9,7 @@
     import {fetchMinimalEvents, eventMinimalStore} from "$lib/stores/eventMinimalStore";
     import {Speedometer} from "$lib/components/ui/speedometer";
     import {Button} from "$lib/components/ui/button";
+    import {goto} from "$app/navigation";
     import Supercluster from "supercluster";
 
     let {defaultLat, defaultLng, tileSheet} = $props();
@@ -20,6 +21,7 @@
     let showMap = $state(true);
     let calculatedSpeed =  $state(0);
     let followUser = $state(true);
+    let eventCreation = $state(true);
     let events: any = $state([]);
     let zoomLevel: any = $state(15);
 
@@ -31,7 +33,31 @@
         await addEventToUser(eventId);
     }
 
+    function createEventMarker() {
+        eventCreation = !eventCreation;
+        if (map) {
+            // On click on map, place marker for event creation
+            map.on('click', async (e) => {
+                let lat = e.lngLat.lat;
+                let lng = e.lngLat.lng;
+                console.log(lat + ' ' + lng);
+                let popup = new maplibregl.Popup();
+                let link = "/create-event?lat=" + lat + "&lng=" + lng;
+                const eventMarker = new maplibregl.Marker({className: `event-marker`})
+                    .setPopup(popup)
+                    .setLngLat([lng, lat])
+                    .addTo(map);
+                try {
+                    await goto(link);
+
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        }
+    }
     const initRevlineMap = () => {
+        // Create map
         map = new maplibregl.Map({
             container: 'map',
             style: tileSheet,
@@ -39,6 +65,8 @@
             zoom: 15,
 
         });
+
+        // Center map on user on load
         map.on('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const defaultLat = urlParams.get('defaultLat') ?? null;
@@ -54,13 +82,13 @@
             }
         });
 
-        map.on('')
 
         map.on('dragstart', () => {
             //stop following user on map dragging
             followUser = false;
         });
 
+        // Initialize Websocket for streaming data
         socket = io('https://revline-express.programar.io/');
 
         if (!socket) {
@@ -70,7 +98,7 @@
 
         debugLine += " - socket: " + socket;
         if (navigator.geolocation) {
-
+            // Update position on map when user moves
             debugLine += " - navigator.geolocation is available";
             navigator.geolocation.watchPosition(
                 (position) => {
@@ -82,10 +110,11 @@
                     socket.emit('locationUpdate', userLocation);
 
                     if (!userMarker) {
-
+                        // Add popover on user marker
                         let popup = new maplibregl.Popup();
                         popup.setHTML('<h1>You are here</h1>')._closeButton.classList.add('d-none')
 
+                        // Create user marker (Motorcycle or car) depending on user settings
                         userMarker = new maplibregl.Marker({className: `self-user-marker`})
                             .setPopup(popup)
                             .setLngLat([longitude, latitude])
@@ -97,6 +126,7 @@
 
                             console.log($userInfoStore, $userInfoStore?.mapIconChoice, isMotorcycle);
 
+                            // Set css class to show the according svg
                             if (isMotorcycle) {
                                 userMarker.removeClassName('self-user-marker');
                                 userMarker.addClassName('self-user-marker-motorcycle');
@@ -130,6 +160,7 @@
 
         fetchMinimalEvents().then(() => {
             $eventMinimalStore.map((event) => {
+                // Create markers for events
                 let eventMarker = new maplibregl.Marker()
                     .setPopup(new maplibregl.Popup().setHTML(
                         '<h1>' + event.name + '</h1>' +
@@ -142,12 +173,14 @@
             });
         });
 
+        // Listen for other user's location changes
         socket.on('userLocations', (locations: any) => {
             console.log('Updated user locations:', locations);
             updateMarkers(locations);
         });
 
         map.on('zoomend', () => {
+            // Group close markers together so they don't overlap
             let zoomLevel = map.getZoom();
             if(zoomLevel > 16) {
                 document.querySelectorAll('.maplibregl-marker:not(.event-marker)').forEach((marker) => {
@@ -161,7 +194,7 @@
         })
     }
 
-
+    // Only show map if user is logged in
     onMount(async () => {
         if (!$authStore.isAuthenticated) {
             errorMessage = 'Please log in to use this feature.';
@@ -180,6 +213,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const eventId = urlParams.get('event');
                 if (eventId) {
+                    // Move map to event when navigated to event by url
                     const event = events.find((event: any) => event[0].id === atob(eventId));
                     if (event) {
                         console.log('Event:', event);
@@ -192,6 +226,7 @@
         }
     });
 
+    // Clean up on destroy
     onDestroy(() => {
         if (map) {
             map.remove();
@@ -207,6 +242,7 @@
         otherUserMarkers.forEach((marker) => marker.remove());
     });
 
+    // Center map on user
     function setUserLocation() {
         navigator.geolocation.getCurrentPosition((position) => {
             const {latitude, longitude, speed} = position.coords;
@@ -233,6 +269,7 @@
                 getUserById(location.userId).then((user) => {
                         if(!user) return;
 
+                        // Fetch user information so marker's popover can show profile picture/name
                         fetchUserInfoForOther(user.user_informations).then((userInformation) => {
                             let image = `https://revline-db.programar.io/api/files/${userInformation?.collectionId}/${userInformation?.id}/${userInformation?.Photo}`;
 
@@ -271,6 +308,7 @@
             }
         });
 
+        // Remove old markers
         otherUserMarkers.forEach((marker, id) => {
             if (!existingIds.has(id)) {
                 marker.remove();
@@ -296,7 +334,7 @@
         const cluster = new Supercluster({ radius: 50, maxZoom: 16, extent: 256 });
         cluster.load(points);
 
-// Get clusters for a zoom level
+        // Get clusters for a zoom level
         const clusters = cluster.getClusters([-180, -85, 180, 85], 10); // Adjust zoom level
         console.log('Clusters:', clusters);
 
@@ -358,6 +396,13 @@
 </script>
 
 {#if showMap}
+    {#if eventCreation}
+        <Button class="fixed z-50 rounded-lg" style="bottom:20%; right: 24px; width: 64px; height: 64px" onclick={createEventMarker}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-plus" viewBox="4 4 8 8">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+            </svg>
+        </Button>
+    {/if}
     <Button class="fixed z-50 rounded-lg" style="bottom:10%; right: 24px; width: 64px; height: 64px" onclick={setUserLocation}>
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="2 2 12 12">
             <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>

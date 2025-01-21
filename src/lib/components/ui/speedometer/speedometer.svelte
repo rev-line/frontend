@@ -20,6 +20,8 @@
     const labels = [0, 25, 50, 75, 100, 125, 150, 175, 200];
 
     const calculatePosition = (value: number) => {
+        // Map km/h to degrees for the speedometer
+
         const angle = (225 + (value / 200) * 270) * (Math.PI / 180);
         const radius = 90;
         const x = radius * Math.cos(angle);
