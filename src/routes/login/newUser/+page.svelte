@@ -33,6 +33,7 @@
                 errors = {}; // Clear previous errors
             } else {
                 register_error = true;
+                //display error based on validation error message
                 errors = result.error.format();
                 if (errors.email) {
                     error_msg += errors.email._errors[0];

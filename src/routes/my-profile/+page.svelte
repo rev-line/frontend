@@ -24,6 +24,7 @@
                username = $authStore.user.username;
            }
            userInfoStore.subscribe(userInformation => {
+               //fetch user information from pocketbase
                if (userInformation)
                {
                     image = `https://revline-db.programar.io/api/files/${userInformation.collectionId}/${userInformation.id}/${userInformation.Photo}`;

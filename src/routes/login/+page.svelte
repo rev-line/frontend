@@ -29,6 +29,7 @@
                 }
             } else {
                 login_error = true;
+                //display error returned from form validation
                 let errors = result.error.format();
                 if (errors.email) {
                     error_msg += errors.email._errors[0];

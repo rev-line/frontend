@@ -7,7 +7,7 @@
 
     onMount(async () => {
         const userCount = await fetchUserCountByMonth();
-
+        //use chart.js for chart creation
         new Chart( document.getElementById("user-chart") as unknown as ChartItem , {
             type: "bar",
             data: {
@@ -26,7 +26,7 @@
 
 
         const eventCount = await fetchEventCreationCount();
-
+        //use chart.js for chart creation
         new Chart( document.getElementById("event-chart") as unknown as ChartItem , {
             type: "polarArea",
             data: {

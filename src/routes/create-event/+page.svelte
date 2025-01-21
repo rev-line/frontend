@@ -24,6 +24,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const lat = urlParams.get('lat') ?? null;
         const lng = urlParams.get('lng') ?? null;
+        //insert latitude and longitude if query params are available
         if (lat && lng) {
             try {
                 eventData.start_latitude = parseFloat(lat);
