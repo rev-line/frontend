@@ -412,6 +412,9 @@
                 {#each [...otherUserList] as [user, coords]}
                     <DropdownMenu.Item onclick={() => showOtherUser(coords.lng, coords.lat)}>{user}</DropdownMenu.Item>
                 {/each}
+                {#if [...otherUserList].length < 1}
+                    <DropdownMenu.Item>None online...</DropdownMenu.Item>
+                {/if}
             </DropdownMenu.Group>
         </DropdownMenu.Content>
     </DropdownMenu.Root>
